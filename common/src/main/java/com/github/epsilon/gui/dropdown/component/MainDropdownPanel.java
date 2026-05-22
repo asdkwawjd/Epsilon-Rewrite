@@ -78,6 +78,7 @@ public class MainDropdownPanel extends AbstractDropdownPanel {
     @Override
     protected void drawPanelContent(DropdownRenderer renderer, int mouseX, int mouseY, float visibleHeight) {
         float currentY = y + DropdownTheme.PANEL_HEADER_HEIGHT - scroll + CONTENT_PADDING;
+        renderer.rect().addRect(x + CONTENT_PADDING, y + DropdownTheme.PANEL_HEADER_HEIGHT, width - CONTENT_PADDING * 2.0f, 0.7f, MD3Theme.withAlpha(MD3Theme.OUTLINE, 55));
 
         for (int index = 0; index < entries.size(); index++) {
             Entry entry = entries.get(index);
@@ -88,9 +89,7 @@ public class MainDropdownPanel extends AbstractDropdownPanel {
             boolean active = entry.isActive();
             entry.hoverAnim.run(hovered ? 1.0f : 0.0f);
             float hover = entry.hoverAnim.getValue();
-            renderer.roundRect().addRoundRect(iconX, iconY, ICON_SIZE, ICON_SIZE,
-                    DropdownTheme.BUTTON_RADIUS,
-                    MD3Theme.lerp(active ? MD3Theme.PRIMARY_CONTAINER : MD3Theme.SURFACE_CONTAINER_HIGH, MD3Theme.PRIMARY_CONTAINER, hover * 0.5f));
+            renderer.roundRect().addRoundRect(iconX, iconY, ICON_SIZE, ICON_SIZE, DropdownTheme.BUTTON_RADIUS, MD3Theme.lerp(active ? MD3Theme.PRIMARY_CONTAINER : MD3Theme.SURFACE_CONTAINER_HIGH, MD3Theme.PRIMARY_CONTAINER, hover * 0.5f));
             float iconScale = ICON_SCALE;
             float iconW = renderer.text().getWidth(entry.icon, iconScale, StaticFontLoader.ICONS);
             float iconH = renderer.text().getHeight(iconScale, StaticFontLoader.ICONS);
@@ -104,7 +103,7 @@ public class MainDropdownPanel extends AbstractDropdownPanel {
             }
         }
         int rows = getIconRows();
-        currentY += rows * ICON_SIZE + Math.max(0, rows - 1) * ICON_GAP + 8.0f + CONTENT_PADDING;
+        currentY += rows * ICON_SIZE + Math.max(0, rows - 1) * ICON_GAP + 4.0f + CONTENT_PADDING;
         renderer.rect().addRect(x + CONTENT_PADDING, currentY - 3.0f, width - CONTENT_PADDING * 2.0f, 0.7f, MD3Theme.withAlpha(MD3Theme.OUTLINE, 55));
         settingsContent.draw(renderer, mouseX, mouseY, x, currentY, width);
     }

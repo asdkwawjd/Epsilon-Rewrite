@@ -84,7 +84,7 @@ public class AimAssist extends Module {
             double deltaAngle;
             double toRotate;
 
-            if (instant) {
+            if (instant.getValue()) {
                 mc.player.setYRot((float) angle);
             } else {
                 deltaAngle = Mth.wrapDegrees(angle - mc.player.getYRot());
@@ -99,7 +99,7 @@ public class AimAssist extends Module {
             double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
             angle = -Math.toDegrees(Math.atan2(deltaY, idk));
 
-            if (instant) {
+            if (instant.getValue()) {
                 mc.player.setXRot((float) angle);
             } else {
                 deltaAngle = Mth.wrapDegrees(angle - mc.player.getXRot());

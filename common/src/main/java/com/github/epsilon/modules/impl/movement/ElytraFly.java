@@ -1,6 +1,7 @@
 package com.github.epsilon.modules.impl.movement;
 
 import com.github.epsilon.events.bus.EventHandler;
+import com.github.epsilon.events.impl.KeyboardInputEvent;
 import com.github.epsilon.events.impl.TickEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
@@ -38,7 +39,7 @@ public class ElytraFly extends Module {
 
     private enum Mode {
         Control,
-        Boost
+        //Boost
     }
 
     private enum SwapMode {
@@ -49,6 +50,7 @@ public class ElytraFly extends Module {
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Control);
     private final EnumSetting<SwapMode> swapMode = enumSetting("SwapMode", SwapMode.InvSwitch);
     private final BoolSetting armored = boolSetting("Armored", false);
+    private final BoolSetting highVersion = boolSetting("1.20.6+", true);
     private final DoubleSetting horizontalSpeed = doubleSetting("HorizontalSpeed", 1.35, 0.1, 5.0, 0.05, () -> mode.is(Mode.Control));
     private final DoubleSetting verticalSpeed = doubleSetting("VerticalSpeed", 0.8, 0.1, 2.0, 0.05, () -> mode.is(Mode.Control));
     private final DoubleSetting accel = doubleSetting("Acceleration", 0.35, 0.05, 1.0, 0.05, () -> mode.is(Mode.Control));
@@ -56,6 +58,7 @@ public class ElytraFly extends Module {
     private final IntSetting boostDelay = intSetting("BoostDelay", 20, 2, 50, 1, () -> mode.is(Mode.Control) && useFireworks.getValue());
 
     private boolean hasFirstFirework;
+    private boolean shouldJump;
     private Input bypassedInput;
     private boolean shouldRestore;
     private final TimerUtils timer = new TimerUtils();
@@ -63,6 +66,7 @@ public class ElytraFly extends Module {
     @Override
     protected void onEnable() {
         hasFirstFirework = false;
+        shouldJump = false;
         timer.setMs(917813L);
     }
 
@@ -75,15 +79,25 @@ public class ElytraFly extends Module {
     private void onTick(TickEvent.Pre event) {
         if (nullCheck()) return;
 
+        redirectRotation(); // 让你转你就受着
+
         switch (mode.getValue()) {
             case Control -> updateControl();
-            case Boost -> updateBoost();
+            //case Boost -> updateBoost();
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         restoreInput();
+    }
+
+    @EventHandler
+    private void onKeyboardInput(KeyboardInputEvent event) {
+        if (shouldJump) {
+            event.setJump(true);
+            shouldJump = false;
+        }
     }
 
     private void updateControl() {
@@ -115,12 +129,16 @@ public class ElytraFly extends Module {
     }
 
     private boolean canFFlying() {
-        return !mc.player.isFallFlying() && !mc.player.isInWater() && hasInput();
+        return !mc.player.isFallFlying() && !mc.player.isInWater();
     }
 
     private boolean startFFlying() {
         if (mc.player.tryToStartFallFlying()) {
+            mc.getConnection().send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, true, false, false)));
+            mc.getConnection().send(new ServerboundPlayerInputPacket(Input.EMPTY));
+            mc.player.lastSentInput = Input.EMPTY;
             mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
+            shouldJump = true;
             return true;
         }
         return false;
@@ -191,16 +209,58 @@ public class ElytraFly extends Module {
 
         mc.player.setDeltaMovement(newX, newY, newZ);
         mc.player.resetFallDistance();
-
-        rotateToMovement(newX, newY, newZ);
     }
 
-    private void rotateToMovement(double x, double y, double z) {
-        double horizontal = Math.sqrt(x * x + z * z);
-        if (horizontal < 1.0E-5 && Math.abs(y) < 1.0E-5) return;
-        float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90.0f;
-        float pitch = (float) (-Math.toDegrees(Math.atan2(y, Math.max(horizontal, 1.0E-5))));
-        RotationManager.INSTANCE.setRotations(new Rot2f(Mth.wrapDegrees(yaw), Mth.clamp(pitch, -90.0f, 90.0f)), 10, Priority.Highest);
+    private void redirectRotation() {
+        RotationManager.INSTANCE.setRotations(new Rot2f(calcYaw(), calcPitch()), 10, Priority.Highest);
+    }
+
+    private float calcYaw() {
+        float yaw = mc.player.getYRot();
+
+        boolean forward = mc.options.keyUp.isDown();
+        boolean back = mc.options.keyDown.isDown();
+        boolean left = mc.options.keyLeft.isDown();
+        boolean right = mc.options.keyRight.isDown();
+
+        if (forward && !back) {
+            if (left && !right) {
+                yaw -= 45f;
+            } else if (right && !left) {
+                yaw += 45f;
+            }
+        } else if (back && !forward) {
+            yaw += 180f;
+            if (left && !right) {
+                yaw += 45f;
+            } else if (right && !left) {
+                yaw -= 45f;
+            }
+        } else if (left && !right) {
+            yaw -= 90f;
+        } else if (right && !left) {
+            yaw += 90f;
+        }
+        return Mth.wrapDegrees(yaw);
+    }
+
+    private float calcPitch() {
+        float pitch = mc.player.getXRot();
+
+        boolean jump = mc.options.keyJump.isDown();
+        boolean sneak = mc.options.keyShift.isDown();
+        boolean moving = MoveUtils.isMoving();
+
+        if (sneak && jump) {
+            pitch = -3f;
+        } else if (jump) {
+            pitch = moving ? -45f : -90f;
+        } else if (sneak) {
+            pitch = moving ? 45f : 90f;
+        } else if (moving) {
+            pitch = -1.9f;
+        }
+        return Mth.clamp(pitch, -90f, 90f);
     }
 
     private boolean hasInput() {
@@ -242,7 +302,7 @@ public class ElytraFly extends Module {
     }
 
     private void syncInput() {
-        if (shouldRestore) return;
+        if (!highVersion.getValue() || shouldRestore) return;
         bypassedInput = mc.player.input.keyPresses;
         mc.player.input.keyPresses = Input.EMPTY;
         mc.getConnection().send(new ServerboundPlayerInputPacket(Input.EMPTY));
@@ -264,7 +324,7 @@ public class ElytraFly extends Module {
         mc.gameMode.handleContainerInput(containerId, containerSlot, 0, ContainerInput.PICKUP, mc.player);
     }
 
-    public boolean isFirework(FireworkRocketEntity firework) {
+    public boolean isMyFirework(FireworkRocketEntity firework) {
         return firework.getOwner() == mc.player;
     }
 

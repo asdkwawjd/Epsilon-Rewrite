@@ -27,7 +27,4 @@ accessible field net/minecraft/client/Minecraft reloadStateTracker Lnet/minecraf
 accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState finished Z
 accessible field net/minecraft/client/ResourceLoadStateTracker reloadState Lnet/minecraft/client/ResourceLoadStateTracker$ReloadState;
 
-accessible field net/minecraft/client/renderer/ItemInHandRenderer mainHandHeight F
-accessible field net/minecraft/client/renderer/ItemInHandRenderer offHandHeight F
-accessible field net/minecraft/client/renderer/ItemInHandRenderer mainHandItem Lnet/minecraft/world/item/ItemStack;
-accessible field net/minecraft/client/renderer/ItemInHandRenderer offHandItem Lnet/minecraft/world/item/ItemStack;
+accessible field net/minecraft/client/player/LocalPlayer lastSentInput Lnet/minecraft/world/entity/player/Input;

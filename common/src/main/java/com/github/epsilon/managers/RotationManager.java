@@ -243,7 +243,7 @@ public class RotationManager {
     @EventHandler(priority = EventPriority.HIGH)
     private void onMoveInput(KeyboardInputEvent event) {
         MovementFix moveFix = MovementFix.INSTANCE;
-        if (moveFix.isEnabled() && active && rotations != null) {
+        if (moveFix.isEnabled() && active && rotations != null && !mc.player.isFallFlying()) {
             moveFix.fixMovement(event, rotations.getYaw());
         }
     }

@@ -16,11 +16,13 @@ import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.Rot2f;
 import com.github.epsilon.utils.timer.TimerUtils;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Items;
@@ -54,12 +56,19 @@ public class ElytraFly extends Module {
     private final IntSetting boostDelay = intSetting("BoostDelay", 20, 2, 50, 1, () -> mode.is(Mode.Control) && useFireworks.getValue());
 
     private boolean hasFirstFirework;
+    private Input bypassedInput;
+    private boolean shouldRestore;
     private final TimerUtils timer = new TimerUtils();
 
     @Override
     protected void onEnable() {
         hasFirstFirework = false;
         timer.setMs(917813L);
+    }
+
+    @Override
+    protected void onDisable() {
+        restoreInput();
     }
 
     @EventHandler
@@ -70,6 +79,11 @@ public class ElytraFly extends Module {
             case Control -> updateControl();
             case Boost -> updateBoost();
         }
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        restoreInput();
     }
 
     private void updateControl() {
@@ -216,6 +230,8 @@ public class ElytraFly extends Module {
     private void jiaFei(int elytraSlot) {
         int elytra = elytraSlot < 9 ? elytraSlot + 36 : elytraSlot;
 
+        syncInput();
+
         swapArmor(elytra);
 
         startFFlying();
@@ -223,6 +239,22 @@ public class ElytraFly extends Module {
         useFirework();
 
         swapArmor(elytra);
+    }
+
+    private void syncInput() {
+        if (shouldRestore) return;
+        bypassedInput = mc.player.input.keyPresses;
+        mc.player.input.keyPresses = Input.EMPTY;
+        mc.getConnection().send(new ServerboundPlayerInputPacket(Input.EMPTY));
+        mc.player.lastSentInput = Input.EMPTY;
+        shouldRestore = true;
+    }
+
+    private void restoreInput() {
+        if (!shouldRestore) return;
+        mc.player.input.keyPresses = bypassedInput;
+        bypassedInput = null;
+        shouldRestore = false;
     }
 
     private void swapArmor(int containerSlot) {

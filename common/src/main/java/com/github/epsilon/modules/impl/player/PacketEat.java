@@ -20,7 +20,7 @@ public class PacketEat extends Module {
     private ItemStack item;
 
     @EventHandler
-    private void onClientTickPost(TickEvent.Post event) {
+    private void onPostTick(TickEvent.Post event) {
         if (nullCheck()) return;
         if (mc.player.isUsingItem()) {
             item = mc.player.getUseItem();
@@ -28,7 +28,7 @@ public class PacketEat extends Module {
     }
 
     @EventHandler
-    private void onPacket(PacketEvent.Send event) {
+    private void onPacketSend(PacketEvent.Send event) {
         if (event.getPacket() instanceof ServerboundPlayerActionPacket packet && packet.getAction() == ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM) {
             if (item.get(DataComponents.FOOD).canAlwaysEat()) {
                 event.setCancelled(true);

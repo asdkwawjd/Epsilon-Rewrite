@@ -12,12 +12,12 @@ import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.rotation.Priority;
+import com.github.epsilon.utils.rotation.Rot2f;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.HitResult;
-import org.joml.Vector2f;
 
 public class SilentAim extends Module {
 
@@ -53,7 +53,7 @@ public class SilentAim extends Module {
             return;
         }
 
-        Vector2f rotations = RotationUtils.calculate(target.getEyePosition());
+        Rot2f rotations = RotationUtils.calculate(target.getEyePosition());
         RotationManager.INSTANCE.setRotations(rotations, 10, Priority.High);
 
         if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY) {

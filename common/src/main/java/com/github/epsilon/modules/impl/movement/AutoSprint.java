@@ -41,7 +41,6 @@ public class AutoSprint extends Module {
 
         if (mode.is(Mode.Legit)) {
             mc.options.keySprint.setDown(true);
-            mc.options.toggleSprint().set(false);
         } else {
             mc.player.setSprinting(
                     mc.player.input.hasForwardImpulse()

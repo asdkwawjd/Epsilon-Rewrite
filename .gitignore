@@ -32,5 +32,6 @@ repo
 .vscode
 .trae
 .claude
+/epsilon-development
 /致敬源码库
 /reference

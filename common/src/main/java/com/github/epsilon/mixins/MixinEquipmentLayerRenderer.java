@@ -23,7 +23,7 @@ public class MixinEquipmentLayerRenderer {
     private RenderType redirectRenderType(Identifier texture, Operation<RenderType> original, EquipmentClientInfo.LayerType layerType, ResourceKey<EquipmentAsset> equipmentAssetId, Model<?> model, Object state, ItemStack itemStack) {
         if (state instanceof EntityRenderState entityState && entityState.entityType == EntityType.PLAYER) {
             Chams chamsModule = Chams.INSTANCE;
-            if (chamsModule.isEnabled()) {
+            if (chamsModule.isEnabled() && chamsModule.noDepth.getValue()) {
                 return Chams.INSTANCE.getRenderType(texture);
             }
         }

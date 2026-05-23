@@ -15,11 +15,13 @@ import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.github.epsilon.Constants.mc;
 
 @Mixin(LivingEntityRenderer.class)
-public abstract class MixinLivingEntityRenderer<S extends LivingEntityRenderState> {
+public abstract class MixinLivingEntityRenderer<T extends LivingEntity, S extends LivingEntityRenderState> {
 
     @Shadow
     public abstract Identifier getTextureLocation(S s);
@@ -27,10 +29,18 @@ public abstract class MixinLivingEntityRenderer<S extends LivingEntityRenderStat
     @ModifyReturnValue(method = "getRenderType", at = @At("RETURN"))
     private RenderType modifyRenderType(RenderType original, S state, boolean isBodyVisible, boolean forceTransparent, boolean appearGlowing) {
         Chams chamsModule = Chams.INSTANCE;
-        if (!chamsModule.isEnabled() || state.entityType != EntityType.PLAYER) {
-            return original;
+        if (chamsModule.isEnabled() && chamsModule.noDepth.getValue() && state.entityType == EntityType.PLAYER) {
+            return Chams.INSTANCE.getRenderType(getTextureLocation(state));
         }
-        return Chams.INSTANCE.getRenderType(getTextureLocation(state));
+        return original;
+    }
+
+    @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("RETURN"))
+    private void onExtractRenderStateReturn(T entity, S state, float partialTicks, CallbackInfo ci) {
+        Chams chams = Chams.INSTANCE;
+        if (chams.isEnabled() && chams.shouldRenderGlow(entity)) {
+            state.outlineColor = chams.getGlowColor(entity);
+        }
     }
 
     @ModifyExpressionValue(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;solveBodyRot(Lnet/minecraft/world/entity/LivingEntity;FF)F"))

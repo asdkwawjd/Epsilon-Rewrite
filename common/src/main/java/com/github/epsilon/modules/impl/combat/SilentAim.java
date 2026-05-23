@@ -45,7 +45,10 @@ public class SilentAim extends Module {
     private void onTick(TickEvent.Pre event) {
         if (nullCheck() || !redirecting) return;
 
-        if (target == null || !target.isAlive() || target.isDeadOrDying()) {
+        if (
+                target == null || !target.isAlive() || target.isDeadOrDying()
+                        || RotationUtils.getEyeDistanceToEntity(target) > range.getValue()
+        ) {
             redirecting = false;
             return;
         }

@@ -10,7 +10,6 @@ import com.github.epsilon.utils.rotation.Rot2f;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
-import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.util.Mth;
 
 import java.util.function.Function;
@@ -95,8 +94,10 @@ public class RotationManager {
                 double speed = (Math.random() * Math.random() * Math.random()) * 20;
                 randomAngle += (float) ((20 + (float) (Math.random() - 0.5) * (Math.random() * Math.random() * Math.random() * 360)) * (mc.player.tickCount / 10 % 2 == 0 ? -1 : 1));
 
-                offset.setYaw((float) (offset.getYaw() + -Mth.sin((float) Math.toRadians(randomAngle)) * speed));
-                offset.setPitch((float) (offset.getPitch() + Mth.cos((float) Math.toRadians(randomAngle)) * speed));
+                offset.set(
+                        (float) (offset.getYaw() + -Mth.sin((float) Math.toRadians(randomAngle)) * speed),
+                        (float) (offset.getPitch() + Mth.cos((float) Math.toRadians(randomAngle)) * speed)
+                );
 
                 targetYaw += offset.getYaw();
                 targetPitch += offset.getPitch();
@@ -107,16 +108,17 @@ public class RotationManager {
                     targetYaw -= offset.getYaw();
                     targetPitch -= offset.getPitch();
 
-                    offset.setYaw((float) (offset.getYaw() + -Mth.sin((float) Math.toRadians(randomAngle)) * speed));
-                    offset.setPitch((float) (offset.getPitch() + Mth.cos((float) Math.toRadians(randomAngle)) * speed));
+                    offset.set(
+                            (float) (offset.getYaw() + -Mth.sin((float) Math.toRadians(randomAngle)) * speed),
+                            (float) (offset.getPitch() + Mth.cos((float) Math.toRadians(randomAngle)) * speed)
+                    );
 
                     targetYaw = targetYaw + offset.getYaw();
                     targetPitch = targetPitch + offset.getPitch();
                 }
 
                 if (!raytrace.apply(new Rot2f(targetYaw, targetPitch))) {
-                    offset.setYaw(0);
-                    offset.setPitch(0);
+                    offset.set(0, 0);
 
                     targetYaw = (float) (targetRotations.getYaw() + Math.random() * 2);
                     targetPitch = (float) (targetRotations.getPitch() + Math.random() * 2);
@@ -172,13 +174,6 @@ public class RotationManager {
     }
 
     @EventHandler
-    private void onPacketSend(PacketEvent.Send event) {
-        if (active && event.getPacket() instanceof ServerboundUseItemPacket packet) {
-            event.setPacket(new ServerboundUseItemPacket(packet.getHand(), packet.getSequence(), rotations.getYaw(), rotations.getPitch()));
-        }
-    }
-
-    @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.getPacket() instanceof ClientboundPlayerPositionPacket || event.getPacket() instanceof ClientboundPlayerRotationPacket) {
             s08 = true;
@@ -230,7 +225,7 @@ public class RotationManager {
         if (active && rotations != null) {
             float yaw = rotations.getYaw();
             float pitch = rotations.getPitch();
-            if (!Float.isNaN(yaw) && !Float.isNaN(pitch) && active) {
+            if (!Float.isNaN(yaw) && !Float.isNaN(pitch)) {
                 event.setYaw(yaw);
                 event.setPitch(pitch);
             }
@@ -297,6 +292,14 @@ public class RotationManager {
     @EventHandler
     private void onFallFlying(FallFlyingEvent event) {
         if (MovementFix.INSTANCE.isEnabled() && active && rotations != null) {
+            event.setPitch(rotations.getPitch());
+        }
+    }
+
+    @EventHandler
+    private void onUseItem(UseItemEvent event) {
+        if (active && rotations != null) {
+            event.setYaw(rotations.getYaw());
             event.setPitch(rotations.getPitch());
         }
     }

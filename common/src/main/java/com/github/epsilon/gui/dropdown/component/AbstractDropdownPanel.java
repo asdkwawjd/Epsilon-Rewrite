@@ -7,6 +7,7 @@ import com.github.epsilon.gui.dropdown.DropdownTheme;
 import com.github.epsilon.gui.panel.MD3Theme;
 import com.github.epsilon.utils.render.animation.Animation;
 import com.github.epsilon.utils.render.animation.Easing;
+import net.minecraft.util.Mth;
 
 public abstract class AbstractDropdownPanel implements DropdownPanel {
 
@@ -27,8 +28,12 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
     protected float dragOffsetX;
     protected float dragOffsetY;
     protected float scroll;
+    protected float targetScroll;
     protected float maxScroll;
     protected float maxPanelHeight = 300.0f;
+
+    private static final float SCROLL_SMOOTHING = 0.16f;
+    private static final float SCROLL_EPSILON = 0.05f;
 
     protected AbstractDropdownPanel(String id, String title, String icon, int panelIndex) {
         this(id, title, null, icon, panelIndex);
@@ -81,6 +86,7 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
         float expand = openAnim.getValue();
         float contentHeight = computeContentHeight();
         float visibleHeight = computeVisibleContentHeight(contentHeight);
+        updateScroll(contentHeight, visibleHeight, true);
         float panelHeight = DropdownTheme.PANEL_HEADER_HEIGHT + (visibleHeight + DropdownTheme.PANEL_BOTTOM_PADDING) * expand;
 
         renderer.shadow().addShadow(x, y, width, panelHeight, DropdownTheme.PANEL_RADIUS, DropdownTheme.PANEL_SHADOW_BLUR, DropdownTheme.panelShadow());
@@ -115,8 +121,7 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
 
         float contentHeight = computeContentHeight();
         float visibleHeight = computeVisibleContentHeight(contentHeight);
-        maxScroll = Math.max(0.0f, contentHeight - visibleHeight);
-        scroll = Math.max(0.0f, Math.min(scroll, maxScroll));
+        updateScroll(contentHeight, visibleHeight, false);
         drawPanelContent(renderer, mouseX, mouseY, visibleHeight);
     }
 
@@ -183,8 +188,7 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!opened) return false;
         if (isPanelHovered(mouseX, mouseY)) {
-            scroll -= (float) amount * DropdownTheme.SCROLL_SPEED;
-            scroll = Math.max(0.0f, Math.min(scroll, maxScroll));
+            targetScroll = Mth.clamp(targetScroll - (float) amount * DropdownTheme.SCROLL_SPEED, 0.0f, maxScroll);
             return true;
         }
         return false;
@@ -239,7 +243,7 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
     @Override
     public void setOpened(boolean opened) {
         this.opened = opened;
-        if (!opened) scroll = 0.0f;
+        if (!opened) setScrollImmediate(0.0f);
     }
 
     @Override
@@ -295,6 +299,27 @@ public abstract class AbstractDropdownPanel implements DropdownPanel {
 
     protected boolean isHovered(double mouseX, double mouseY, float x, float y, float w, float h) {
         return mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+    }
+
+    protected void setScrollImmediate(float value) {
+        scroll = Mth.clamp(value, 0.0f, maxScroll);
+        targetScroll = scroll;
+    }
+
+    private void updateScroll(float contentHeight, float visibleHeight, boolean animate) {
+        maxScroll = Math.max(0.0f, contentHeight - visibleHeight);
+        targetScroll = Mth.clamp(targetScroll, 0.0f, maxScroll);
+        scroll = Mth.clamp(scroll, 0.0f, maxScroll);
+
+        if (!animate) {
+            return;
+        }
+
+        if (Math.abs(scroll - targetScroll) <= SCROLL_EPSILON) {
+            scroll = targetScroll;
+        } else {
+            scroll = Mth.lerp(SCROLL_SMOOTHING, scroll, targetScroll);
+        }
     }
 
     protected String trimToWidth(String value, float scale, float maxWidth, DropdownRenderer renderer) {

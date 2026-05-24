@@ -113,7 +113,7 @@ public class AddonDropdownPanel extends AbstractDropdownPanel {
         for (EpsilonAddon addon : AddonManager.INSTANCE.getAddons()) {
             if (isHovered(mouseX, mouseY, contentX, currentY, contentW, ADDON_ROW_HEIGHT)) {
                 selectedAddonId = addon.getAddonId();
-                scroll = Math.min(scroll, Math.max(0.0f, currentY - y));
+                setScrollImmediate(Math.min(scroll, Math.max(0.0f, currentY - y)));
                 ensureWidgets(addon);
                 return true;
             }

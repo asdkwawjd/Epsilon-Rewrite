@@ -49,7 +49,7 @@ public class AutoTool extends Module {
             lastItem.add(mc.player.getInventory().getSelectedSlot());
 
             if (silent.getValue()) {
-                mc.player.connection.send(new ServerboundSetCarriedItemPacket(getTool(pos)));
+                mc.getConnection().send(new ServerboundSetCarriedItemPacket(getTool(pos)));
             } else {
                 mc.player.getInventory().setSelectedSlot(getTool(pos));
             }
@@ -59,9 +59,11 @@ public class AutoTool extends Module {
 
             swapDelay = System.currentTimeMillis();
         } else if (swap && !lastItem.isEmpty() && System.currentTimeMillis() >= swapDelay + 300 && swapBack.getValue()) {
-            if (silent.getValue())
-                mc.player.connection.send(new ServerboundSetCarriedItemPacket(lastItem.get(0)));
-            else mc.player.getInventory().setSelectedSlot(lastItem.get(0));
+            if (silent.getValue()) {
+                mc.getConnection().send(new ServerboundSetCarriedItemPacket(lastItem.get(0)));
+            } else {
+                mc.player.getInventory().setSelectedSlot(lastItem.get(0));
+            }
 
             itemIndex = lastItem.get(0);
             lastItem.clear();

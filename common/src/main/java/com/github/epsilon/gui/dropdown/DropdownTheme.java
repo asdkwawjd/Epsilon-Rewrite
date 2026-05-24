@@ -51,7 +51,7 @@ public class DropdownTheme {
     public static final float BUTTON_HEIGHT = 16.0f;
     public static final float BUTTON_RADIUS = 5.0f;
 
-    public static final float SCROLL_SPEED = 14.0f;
+    public static final float SCROLL_SPEED = 28.0f;
 
     public static final float PANEL_BOTTOM_PADDING = 8.0f;
 

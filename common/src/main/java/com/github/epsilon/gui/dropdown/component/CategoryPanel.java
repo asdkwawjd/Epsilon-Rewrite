@@ -110,7 +110,7 @@ public class CategoryPanel extends AbstractDropdownPanel {
 
     public void setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery == null ? "" : searchQuery.trim().toLowerCase();
-        scroll = 0.0f;
+        setScrollImmediate(0.0f);
     }
 
     @Override

@@ -24,10 +24,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec3;
 
 public class ElytraFly extends Module {
 
@@ -136,11 +134,8 @@ public class ElytraFly extends Module {
 
     private boolean startFFlying() {
         if (mc.player.tryToStartFallFlying()) {
-            mc.getConnection().send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, true, false, false)));
-            mc.getConnection().send(new ServerboundPlayerInputPacket(Input.EMPTY));
-            mc.player.lastSentInput = Input.EMPTY;
-            mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             shouldJump = true;
+            mc.getConnection().send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             return true;
         }
         return false;
@@ -249,26 +244,6 @@ public class ElytraFly extends Module {
                 || mc.options.keyDown.isDown();
     }
 
-    private Vec3 getMoveDir() {
-        float forward = mc.player.input.getMoveVector().y;
-        float left = mc.player.input.getMoveVector().x;
-
-        if (forward == 0 && left == 0) {
-            return Vec3.ZERO;
-        }
-
-        double yawRad = Math.toRadians(mc.player.getYRot());
-        double sin = Math.sin(yawRad);
-        double cos = Math.cos(yawRad);
-
-        double x = forward * -sin + left * cos;
-        double z = forward * cos + left * sin;
-
-        double length = Math.sqrt(x * x + z * z);
-        if (length <= 0) return Vec3.ZERO;
-        return new Vec3(x / length, 0, z / length);
-    }
-
     private void jiaFei(int elytraSlot) {
         int elytra = elytraSlot < 9 ? elytraSlot + 36 : elytraSlot;
 
@@ -304,10 +279,6 @@ public class ElytraFly extends Module {
         mc.gameMode.handleContainerInput(containerId, containerSlot, 0, ContainerInput.PICKUP, mc.player);
         mc.gameMode.handleContainerInput(containerId, 6, 0, ContainerInput.PICKUP, mc.player);
         mc.gameMode.handleContainerInput(containerId, containerSlot, 0, ContainerInput.PICKUP, mc.player);
-    }
-
-    public boolean isMyFirework(FireworkRocketEntity firework) {
-        return firework.getOwner() == mc.player;
     }
 
     public boolean isArmorMode() {

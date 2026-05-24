@@ -351,13 +351,6 @@ public class RotationUtils {
             }
         }
 
-        /*
-         * Fixing AimModulo360
-         */
-        if (yaw < 360.0f && yaw > -360.0f) {
-            yaw = yaw + 720.0f;
-        }
-
         return new Rot2f(yaw, pitch);
     }
 

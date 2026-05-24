@@ -109,6 +109,7 @@ public class ElytraFly extends Module {
         FindItemResult elytra = InvUtils.find(Items.ELYTRA);
 
         if (!canGlide(elytra.found()) || mc.player.onGround()) {
+            shouldJump = true;
             hasFirstFirework = false;
             return;
         }

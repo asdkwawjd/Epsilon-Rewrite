@@ -95,6 +95,7 @@ public class ModuleManager {
                 Blink.INSTANCE,
                 ElytraFly.INSTANCE,
                 FastWeb.INSTANCE,
+                GUIMove.INSTANCE,
                 MovementFix.INSTANCE,
                 NoFall.INSTANCE,
                 NoSlow.INSTANCE,

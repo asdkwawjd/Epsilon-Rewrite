@@ -3,11 +3,11 @@ package com.github.epsilon.modules.impl.movement;
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.KeyboardInputEvent;
 import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.TravelEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
-import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.player.FindItemResult;
@@ -51,9 +51,6 @@ public class ElytraFly extends Module {
     private final EnumSetting<SwapMode> swapMode = enumSetting("Swap Mode", SwapMode.InvSwitch);
     private final BoolSetting armored = boolSetting("Armored", false);
     private final BoolSetting highVersion = boolSetting("1206+", true);
-    private final DoubleSetting horizontalSpeed = doubleSetting("Horizontal Speed", 1.35, 0.1, 5.0, 0.05, () -> mode.is(Mode.Control));
-    private final DoubleSetting verticalSpeed = doubleSetting("Vertical Speed", 0.8, 0.1, 2.0, 0.05, () -> mode.is(Mode.Control));
-    private final DoubleSetting accel = doubleSetting("Acceleration", 0.35, 0.05, 1.0, 0.05, () -> mode.is(Mode.Control));
     private final BoolSetting useFireworks = boolSetting("Use Fireworks", true, () -> mode.is(Mode.Control));
     private final IntSetting boostDelay = intSetting("Boost Delay", 20, 2, 50, 1, () -> mode.is(Mode.Control) && useFireworks.getValue());
 
@@ -93,6 +90,15 @@ public class ElytraFly extends Module {
     }
 
     @EventHandler
+    private void onTravel(TravelEvent event) {
+        if (mode.is(Mode.Control)) {
+            if (!hasInput() && (!useFireworks.getValue() || hasFirstFirework)) {
+                mc.player.setDeltaMovement(0, 0.02, 0);
+            }
+        }
+    }
+
+    @EventHandler
     private void onKeyboardInput(KeyboardInputEvent event) {
         if (shouldJump) {
             event.setJump(true);
@@ -117,10 +123,6 @@ public class ElytraFly extends Module {
                 startFFlying();
             }
             useFirework();
-        }
-
-        if (!useFireworks.getValue() || hasFirstFirework) {
-            applyMotion();
         }
     }
 
@@ -183,32 +185,6 @@ public class ElytraFly extends Module {
         } else {
             InvUtils.invSwapBack();
         }
-    }
-
-    private void applyMotion() {
-        if (!hasInput()) {
-            mc.player.setDeltaMovement(Vec3.ZERO);
-            mc.player.resetFallDistance();
-            return;
-        }
-
-        Vec3 moveDir = getMoveDir();
-        Vec3 thisMotion = mc.player.getDeltaMovement();
-
-        boolean up = mc.options.keyJump.isDown();
-        boolean down = mc.options.keyShift.isDown();
-
-        double newX = moveDir.x * horizontalSpeed.getValue();
-        double newY = up == down ? 0.0 : (up ? verticalSpeed.getValue() : -verticalSpeed.getValue());
-        double newZ = moveDir.z * horizontalSpeed.getValue();
-
-        double factor = Math.max(accel.getValue(), 0.85);
-        newX = Mth.lerp(factor, thisMotion.x, newX);
-        newY = Mth.lerp(factor, thisMotion.y, newY);
-        newZ = Mth.lerp(factor, thisMotion.z, newZ);
-
-        mc.player.setDeltaMovement(newX, newY, newZ);
-        mc.player.resetFallDistance();
     }
 
     private void redirectRotation() {

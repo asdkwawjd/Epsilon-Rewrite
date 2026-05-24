@@ -286,6 +286,14 @@ public class RotationManager {
     }
 
     @EventHandler
+    private void onFireworkUpdate(FireworkUpdateEvent event) {
+        if (active && rotations != null) {
+            event.setYaw(rotations.getYaw());
+            event.setPitch(rotations.getPitch());
+        }
+    }
+
+    @EventHandler
     private void onAttack(AttackYawEvent event) {
         if (rotations != null) {
             event.setYaw(rotations.getYaw());

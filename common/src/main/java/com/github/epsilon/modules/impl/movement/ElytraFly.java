@@ -50,7 +50,6 @@ public class ElytraFly extends Module {
     private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.Control);
     private final EnumSetting<SwapMode> swapMode = enumSetting("Swap Mode", SwapMode.InvSwitch);
     private final BoolSetting armored = boolSetting("Armored", false);
-    private final BoolSetting highVersion = boolSetting("1206+", true);
     private final BoolSetting useFireworks = boolSetting("Use Fireworks", true, () -> mode.is(Mode.Control));
     private final IntSetting boostDelay = intSetting("Boost Delay", 20, 2, 50, 1, () -> mode.is(Mode.Control) && useFireworks.getValue());
 
@@ -284,7 +283,7 @@ public class ElytraFly extends Module {
     }
 
     private void syncInput() {
-        if (!highVersion.getValue() || shouldRestore) return;
+        if (shouldRestore) return;
         bypassedInput = mc.player.input.keyPresses;
         mc.player.input.keyPresses = Input.EMPTY;
         mc.getConnection().send(new ServerboundPlayerInputPacket(Input.EMPTY));

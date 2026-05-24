@@ -284,7 +284,8 @@ public class ModuleListHUD extends HudModule {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), a);
     }
 
-    private record ItemInfo(Module module, String text, float boxWidth, float totalWidth, float alpha, String hudInfo, float hudInfoWidth) {
+    private record ItemInfo(Module module, String text, float boxWidth, float totalWidth, float alpha, String hudInfo,
+                            float hudInfoWidth) {
     }
 
 }

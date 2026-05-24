@@ -4,6 +4,8 @@ accessible field net/minecraft/client/multiplayer/MultiPlayerGameMode destroyPro
 
 accessible field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket yRot F
 mutable field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket yRot F
+accessible field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket xRot F
+mutable field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket xRot F
 
 accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState
 

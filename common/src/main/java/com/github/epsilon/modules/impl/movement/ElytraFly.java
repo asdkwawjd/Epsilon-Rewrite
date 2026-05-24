@@ -92,7 +92,7 @@ public class ElytraFly extends Module {
     @EventHandler
     private void onTravel(TravelEvent event) {
         if (mode.is(Mode.Control)) {
-            if (!hasInput() && (!useFireworks.getValue() || hasFirstFirework)) {
+            if (!hasMoveInput() && (!useFireworks.getValue() || hasFirstFirework)) {
                 mc.player.setDeltaMovement(0, 0.02, 0);
             }
         }
@@ -239,8 +239,14 @@ public class ElytraFly extends Module {
         return Mth.clamp(pitch, -90f, 90f);
     }
 
-    private boolean hasInput() {
-        return MoveUtils.isMoving() || mc.options.keyJump.isDown() || mc.options.keyShift.isDown();
+    private boolean hasMoveInput() {
+        return !(mc.player.input.keyPresses.forward() == mc.player.input.keyPresses.backward())
+                || !(mc.player.input.keyPresses.left() == mc.player.input.keyPresses.right())
+                || mc.options.keyJump.isDown()
+                || mc.options.keyLeft.isDown()
+                || mc.options.keyRight.isDown()
+                || mc.options.keyUp.isDown()
+                || mc.options.keyDown.isDown();
     }
 
     private Vec3 getMoveDir() {

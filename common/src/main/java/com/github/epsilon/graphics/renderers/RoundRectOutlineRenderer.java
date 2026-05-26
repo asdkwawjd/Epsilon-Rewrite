@@ -38,8 +38,7 @@ public class RoundRectOutlineRenderer implements IRenderer {
     }
 
     public void addOutline(float x, float y, float width, float height, float radiusTopLeft, float radiusTopRight, float radiusBottomRight, float radiusBottomLeft, float outlineWidth, Color color) {
-        addOutlineGradient(x, y, width, height, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft, outlineWidth, color, color, color, color
-        );
+        addOutlineGradient(x, y, width, height, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft, outlineWidth, color, color, color, color);
     }
 
     public void addVerticalGradient(float x, float y, float width, float height, float radius, float outlineWidth, Color top, Color bottom) {

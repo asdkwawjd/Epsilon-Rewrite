@@ -1,6 +1,6 @@
 package com.github.epsilon.events.impl;
 
-import com.github.epsilon.events.Cancellable;
+import com.github.epsilon.events.bus.Cancellable;
 import net.minecraft.network.protocol.Packet;
 
 public class PacketEvent {

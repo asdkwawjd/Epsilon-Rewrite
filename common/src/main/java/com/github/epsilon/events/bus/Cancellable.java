@@ -1,4 +1,4 @@
-package com.github.epsilon.events;
+package com.github.epsilon.events.bus;
 
 public class Cancellable {
 

@@ -1,6 +1,5 @@
 package com.github.epsilon.events.bus;
 
-import com.github.epsilon.events.Cancellable;
 import com.github.epsilon.events.bus.listeners.IListener;
 import com.github.epsilon.events.bus.listeners.LambdaListener;
 

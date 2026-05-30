@@ -174,13 +174,6 @@ public class RotationManager {
     }
 
     @EventHandler
-    private void onPacketSend(PacketEvent.Send event) {
-        if (active && event.getPacket() instanceof ServerboundUseItemPacket packet) {
-            event.setPacket(new ServerboundUseItemPacket(packet.getHand(), packet.getSequence(), rotations.getYaw(), rotations.getPitch()));
-        }
-    }
-
-    @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.getPacket() instanceof ClientboundPlayerPositionPacket || event.getPacket() instanceof ClientboundPlayerRotationPacket) {
             s08 = true;

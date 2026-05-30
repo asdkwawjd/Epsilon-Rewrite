@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /*
- * Author Moli
+ * @author Moli
  * todo: 点名道姓模式、支持dm、扩充语料库
  */
 
@@ -48,7 +48,7 @@ public class AutoKouZi extends Module {
         loadSentences();
         sentSentences.clear();
         lastSendTime = System.currentTimeMillis();
-        sendMessage("已加�?" + allSentences.size() + " 条句�?);
+        sendMessage("已加载 " + allSentences.size() + " 条句子");
     }
 
     @Override
@@ -58,8 +58,8 @@ public class AutoKouZi extends Module {
     }
 
     @EventHandler
-    private void onClientTick(PlayerTickEvent event) {
-        if (nullCheck() || !canSend()) return;
+    private void onPlayerTick(PlayerTickEvent event) {
+        if (!canSend()) return;
 
         if (mode.getValue() == Mode.TXT) {
             sendTxtMode();
@@ -76,8 +76,8 @@ public class AutoKouZi extends Module {
 
     private void sendTxtMode() {
         if (allSentences.isEmpty()) {
-            sendMessage("句子列表为空，请检查文�?);
-                    setEnabled(false);
+            sendMessage("句子列表为空，请检查文件");
+            setEnabled(false);
             return;
         }
 
@@ -90,8 +90,8 @@ public class AutoKouZi extends Module {
 
         if (available.isEmpty()) {
             sentSentences.clear();
-            sendMessage("所有句子已发送完毕，重新开�?);
-                    available.addAll(allSentences);
+            sendMessage("所有句子已发送完毕，重新开始");
+            available.addAll(allSentences);
         }
 
         String selected = available.get(random.nextInt(available.size()));
@@ -102,8 +102,8 @@ public class AutoKouZi extends Module {
 
     private void sendSentenceMode() {
         if (allSentences.isEmpty()) {
-            sendMessage("关键词列表为空，请检查文�?);
-                    setEnabled(false);
+            sendMessage("关键词列表为空，请检查文件");
+            setEnabled(false);
             return;
         }
 
@@ -113,33 +113,33 @@ public class AutoKouZi extends Module {
 
     private String generateSentence() {
         List<String> templates = Arrays.asList(
-                "�?verb了你�?family",
-                "�?family被我$verb�?,
-                "$adjective�?family",
+                "我$verb了你的$family",
+                "你$family被我$verb了",
+                "$adjective的$family",
                 "你个$adjective$family",
-                "�?verb�?family",
-                "$family被我$verb�?,
-                "�?family�?adjective",
+                "我$verb你$family",
+                "$family被我$verb了",
+                "你$family真$adjective",
                 "$adjective$family被我$verb",
-                "�?adjective$family",
+                "我$adjective$family",
                 "$family$verb了你"
         );
 
         List<String> verbs = Arrays.asList(
-                "�?, "� ?, "�?, "�?,"�?, " 强奸 ", " 上了 ", " 爆了 ", " 插了 ", " 弄了 "
+                "操", "日", "干", "草", "艹", "强奸", "上了", "爆了", "插了", "弄了"
         );
 
         List<String> families = Arrays.asList(
-                "�?, " 母亲", " 老母", " 妈妈", " 妈� ?, "母亲�?,
-        "�?, "�?,"父亲", "老爹",
+                "妈", "母亲", "老母", "妈妈", "妈逼", "母亲逼",
+                "爹", "爸", "父亲", "老爹",
                 "奶奶", "爷爷", "祖宗",
                 "全家", "一家老小"
         );
 
         List<String> adjectives = Arrays.asList(
-                "傻�?, " 脑瘫", " 废物", " 垃圾", " 贱货", " 婊子",
-                "�?, "� ?, "畜生", "杂种", "野种",
-                "�?, "�?,"�?, "�?
+                "傻逼", "脑瘫", "废物", "垃圾", "贱货", "婊子",
+                "狗", "猪", "畜生", "杂种", "野种",
+                "死", "烂", "臭", "脏"
         );
 
         String template = templates.get(random.nextInt(templates.size()));
@@ -154,7 +154,7 @@ public class AutoKouZi extends Module {
         if (random.nextBoolean() && !allSentences.isEmpty()) {
             String extraWord = allSentences.get(random.nextInt(Math.min(20, allSentences.size())));
             if (extraWord.length() < 20) {
-                template = template + "�? + extraWord;
+                template = template + "，" + extraWord;
             }
         }
 
@@ -216,7 +216,7 @@ public class AutoKouZi extends Module {
 
             reader.close();
         } catch (Exception e) {
-            sendMessage("加载自定义文件失�? " + e.getMessage());
+            sendMessage("加载自定义文件失败: " + e.getMessage());
             loadFromDefaultPath();
         }
     }

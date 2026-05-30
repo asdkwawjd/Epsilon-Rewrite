@@ -96,8 +96,12 @@ public class Scaffold extends Module {
         GodBridge
     }
 
+    private enum RotationMode {
+        Rise,
+        Hypixel
+    }
+
     private enum RaytraceMode {
-        Hypixel,
         Normal,
         Strict
     }
@@ -114,8 +118,9 @@ public class Scaffold extends Module {
     private final BoolSetting swapBack = boolSetting("Swap Back", true, () -> swapMode.is(SwapMode.Normal));
     private final BoolSetting skipTicks = boolSetting("Skip Ticks", false);
     private final BoolSetting snap = boolSetting("Snap", false, () -> mode.is(Mode.GodBridge));
-    private final EnumSetting<RaytraceMode> raytrace = enumSetting("Raytrace", RaytraceMode.Hypixel);
-    private final IntSetting rotateSpeed = intSetting("Rotation Speed", 10, 1, 10, 1, () -> !raytrace.is(RaytraceMode.Hypixel));
+    private final EnumSetting<RotationMode> rotationMode = enumSetting("Rotation Mode", RotationMode.Rise);
+    private final EnumSetting<RaytraceMode> raytrace = enumSetting("Raytrace Mode", RaytraceMode.Normal);
+    private final IntSetting rotateSpeed = intSetting("Rotation Speed", 10, 1, 10, 1, () -> rotationMode.is(RotationMode.Rise));
     private final IntSetting rotateBackSpeed = intSetting("Rotation Back Speed", 10, 1, 10, 1, () -> mode.is(Mode.TellyBridge));
     private final IntSetting tellyTicks = intSetting("Telly Ticks", 1, 0, 6, 1, () -> mode.is(Mode.TellyBridge));
     private final BoolSetting safeWalk = boolSetting("Safe Walk", false, () -> mode.is(Mode.GodBridge));
@@ -317,7 +322,7 @@ public class Scaffold extends Module {
         rotation = getRotation(blockPos, direction);
         int speed = rotateSpeed.getValue();
 
-        if (raytrace.is(RaytraceMode.Hypixel)) {
+        if (rotationMode.is(RotationMode.Hypixel)) {
             speed = airTicks <= 1 ? 127 : 35;
         }
 
@@ -342,7 +347,6 @@ public class Scaffold extends Module {
         }
 
         if (switch (raytrace.getValue()) {
-            case Hypixel -> !RotationManager.INSTANCE.isDone();
             case Normal -> !RaytraceUtils.overBlock(RotationManager.INSTANCE.getRotation(), blockPos);
             case Strict -> !RaytraceUtils.overBlock(RotationManager.INSTANCE.getRotation(), blockPos, direction);
         }) {
@@ -482,10 +486,6 @@ public class Scaffold extends Module {
                         Math.abs(Mth.wrapDegrees(mc.player.getYRot() - 180 - b))
                 )
         );
-
-        if (raytrace.is(RaytraceMode.Hypixel)) {
-            return new Rot2f(yawArray[0], 82.0F);
-        }
 
         float[] pitchArray = {75.0F, 82.0F, 87.0F};
 

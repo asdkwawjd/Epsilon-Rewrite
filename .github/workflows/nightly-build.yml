@@ -1,10 +1,9 @@
-# Automatically build the project and run any configured tests for every push
-# and submitted pull request. This can help catch issues that only occur on
-# certain platforms or Java versions, and provides a first line of defence
-# against bad commits.
+name: Nightly Build
 
-name: Build Latest
-on: [workflow_dispatch]
+on:
+  schedule:
+    - cron: '0 20 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,6 +29,10 @@ jobs:
       - name: Build
         run: ./gradlew build
 
+      - name: Get current date
+        run: |
+          echo "BUILD_TIME=$(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M')" >> $GITHUB_ENV
+
       - name: Upload NeoForge Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +51,8 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          automatic_release_tag: "nightly"
+          title: "Nightly Build (${{ env.BUILD_TIME }})"
           prerelease: true
           files: |
             neoforge/build/libs/*.jar

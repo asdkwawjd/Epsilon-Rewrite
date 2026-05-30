@@ -2,6 +2,7 @@ package com.github.epsilon.modules.impl.movement;
 
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.KeyboardInputEvent;
+import com.github.epsilon.events.impl.MousePressEvent;
 import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.events.impl.TravelEvent;
 import com.github.epsilon.managers.RotationManager;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.Items;
+import org.lwjgl.glfw.GLFW;
 
 public class ElytraFly extends Module {
 
@@ -61,12 +63,7 @@ public class ElytraFly extends Module {
     }
 
     @EventHandler
-    private void onTick(PlayerTickEvent event) {
-        if (nullCheck()) {
-            toggle();
-            return;
-        }
-
+    private void onPlayerTick(PlayerTickEvent event) {
         redirectRotation(); // 让你转你就受着
 
         switch (mode.getValue()) {
@@ -86,13 +83,24 @@ public class ElytraFly extends Module {
 
     @EventHandler
     private void onKeyboardInput(KeyboardInputEvent event) {
+        event.setSprinting(false);
+        mc.player.setSprinting(false);
         if (shouldJump) {
             event.setJump(true);
             shouldJump = false;
         }
     }
 
+    @EventHandler
+    private void onMousePress(MousePressEvent event) {
+        if (event.getButton() == GLFW.GLFW_MOUSE_BUTTON_RIGHT && event.getAction() == GLFW.GLFW_PRESS) { // 你吃你冯了个福呢
+            event.setCancelled(true);
+        }
+    }
+
     private void updateControl() {
+        if (mc.player.isSprinting()) return;
+
         FindItemResult elytra = InvUtils.find(Items.ELYTRA);
 
         if (!canGlide(elytra.found()) || mc.player.onGround()) {

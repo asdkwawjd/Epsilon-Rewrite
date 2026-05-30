@@ -13,11 +13,16 @@
   <a href="https://discord.gg/vYbaae3X7e"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=flat-square&logo=discord&logoColor=white"></a>
 </p>
 
+<p align="center">
+  <a href="https://qm.qq.com/q/WPvwQZvYci"><img alt="QQ Group 1" src="https://img.shields.io/badge/QQ%201%E7%BE%A4-join-12B7F5?style=flat-square&logo=tencentqq&logoColor=white"></a>
+  <a href="https://qm.qq.com/q/3hhg8ww9ag"><img alt="QQ Group 2" src="https://img.shields.io/badge/QQ%202%E7%BE%A4-join-12B7F5?style=flat-square&logo=tencentqq&logoColor=white"></a>
+</p>
+
 ## 📌 Overview
 A modern multi loader Minecraft utility client built on NeoForge & Fabric with advanced rendering system and modular architecture.
 
 ## 🚀 Addon System
-[Epsilon Addon Template](https://github.com/NekoyaHouse/Epsilon-Addon-Template)
+[Epsilon Addon Template](https://github.com/slmpc/Epsilon-Addon-Template)
 
 [Addon Development Guide](docs/addon-development.md)
 

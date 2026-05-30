@@ -2,7 +2,7 @@ package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.MousePressEvent;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -59,10 +59,7 @@ public class AutoDtap extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
-        // 如果正在执行过程中，消耗掉右键点击事件
+    private void onTick(PlayerTickEvent event) {
         if (step != 0) {
             while (mc.options.keyUse.consumeClick()) {
             }
@@ -100,7 +97,7 @@ public class AutoDtap extends Module {
                     originalSlot = mc.player.getInventory().getSelectedSlot();
 
                     if (isObsidian) {
-                        // 如果已经是黑曜石，直接切水晶并放置
+                        // 如果已经是黑曜石，直接切水晶并放�?
                         InvUtils.swap(endCrystalSlot, false);
 
                         BlockHitResult topHit = new BlockHitResult(
@@ -115,16 +112,13 @@ public class AutoDtap extends Module {
                         stepDelay = 1 + random.nextInt(2);
                         step = 2; // 跳到恢复阶段
                     } else {
-                        // 寻找黑曜石
                         int obsidianSlot = InvUtils.findInHotbar(Items.OBSIDIAN).slot();
                         if (obsidianSlot == -1) return;
 
-                        // 切换到黑曜石并放置
                         InvUtils.swap(obsidianSlot, false);
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, blockHit);
                         mc.player.swing(InteractionHand.MAIN_HAND);
 
-                        // 立即切到水晶，防止重复放置黑曜石
                         InvUtils.swap(endCrystalSlot, false);
 
                         stepDelay = 1 + random.nextInt(2);
@@ -134,7 +128,6 @@ public class AutoDtap extends Module {
                 break;
 
             case 1:
-                // 放置水晶
                 HitResult hit1 = mc.hitResult;
                 if (!(hit1 instanceof BlockHitResult baseHit)) {
                     resetState();
@@ -156,7 +149,6 @@ public class AutoDtap extends Module {
                 break;
 
             case 2:
-                // 恢复原手持
                 if (swapBack.getValue() && originalSlot != -1) {
                     InvUtils.swap(originalSlot, false);
                 }

@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -11,10 +11,9 @@ import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.math.MathUtils;
 import net.minecraft.client.KeyMapping;
 
-/*
- * Author Moli
+/**
+ * @author Moli
  * fix: 已基本害死伪随机。
- * todo: 绕过反作弊
  */
 
 public class AutoClicker extends Module {
@@ -23,12 +22,12 @@ public class AutoClicker extends Module {
 
     private final EnumSetting<ClickButton> button = enumSetting("Button", ClickButton.BOTH);
 
-    private final IntSetting leftMinCPS = intSetting("Left Min CPS", 8, 1, 520, 1, this::isLeftButtonEnabled); // ❤ 饥渴难耐
-    private final IntSetting leftMaxCPS = intSetting("Left Max CPS", 12, 1, 520, 1, this::isLeftButtonEnabled); // ❤ 饥渴难耐
+    private final IntSetting leftMinCPS = intSetting("Left Min CPS", 8, 1, 520, 1, this::isLeftButtonEnabled);
+    private final IntSetting leftMaxCPS = intSetting("Left Max CPS", 12, 1, 520, 1, this::isLeftButtonEnabled);
     private final BoolSetting leftJitter = boolSetting("Left Jitter", false, this::isLeftButtonEnabled);
 
-    private final IntSetting rightMinCPS = intSetting("Right Min CPS", 8, 1, 520, 1, this::isRightButtonEnabled); // ❤ 饥渴难耐
-    private final IntSetting rightMaxCPS = intSetting("Right Max CPS", 12, 1, 520, 1, this::isRightButtonEnabled); // ❤ 饥渴难耐
+    private final IntSetting rightMinCPS = intSetting("Right Min CPS", 8, 1, 520, 1, this::isRightButtonEnabled);
+    private final IntSetting rightMaxCPS = intSetting("Right Max CPS", 12, 1, 520, 1, this::isRightButtonEnabled);
     private final BoolSetting rightJitter = boolSetting("Right Jitter", false, this::isRightButtonEnabled);
 
     private final BoolSetting enableBurst = boolSetting("Enable Burst", true);
@@ -59,7 +58,7 @@ public class AutoClicker extends Module {
     }
 
     @EventHandler
-    public void onTick(TickEvent.Pre event) {
+    public void onTick(PlayerTickEvent event) {
         if (nullCheck() || mc.screen != null) return;
 
         long currentTime = System.currentTimeMillis();

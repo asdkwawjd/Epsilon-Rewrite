@@ -3,7 +3,7 @@ package com.github.epsilon.modules.impl.combat;
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.PacketEvent;
 import com.github.epsilon.events.impl.RespawnEvent;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.SendPositionEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -36,7 +36,7 @@ public class AntiBot extends Module {
     }
 
     @EventHandler
-    public void onRespawn(RespawnEvent event) {
+    private void onRespawn(RespawnEvent event) {
         if (mc.player.tickCount <= 1) {
             ids.clear();
             uuids.clear();
@@ -44,7 +44,7 @@ public class AntiBot extends Module {
     }
 
     @EventHandler
-    public void onMotion(TickEvent.Pre event) {
+    private void onSendPosition(SendPositionEvent event) {
         for (Map.Entry<UUID, Long> entry : uuids.entrySet()) {
             if (System.currentTimeMillis() - entry.getValue() > 500L) {
                 uuids.remove(entry.getKey());
@@ -53,7 +53,7 @@ public class AntiBot extends Module {
     }
 
     @EventHandler
-    public void onPacket(PacketEvent.Receive event) {
+    private void onPacketReceive(PacketEvent.Receive event) {
         if (event.getPacket() instanceof ClientboundPlayerInfoUpdatePacket packet) {
             if (packet.actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                 for (ClientboundPlayerInfoUpdatePacket.Entry entry : packet.entries()) {

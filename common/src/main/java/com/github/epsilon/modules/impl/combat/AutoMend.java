@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -46,9 +46,7 @@ public class AutoMend extends Module {
     }
 
     @EventHandler
-    private void onClientTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
+    private void onClientTick(PlayerTickEvent event) {
         FindItemResult result = InvUtils.findInHotbar(Items.EXPERIENCE_BOTTLE);
         if (!result.found()) return;
 

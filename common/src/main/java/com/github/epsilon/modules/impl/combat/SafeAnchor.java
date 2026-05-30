@@ -4,8 +4,8 @@ import com.github.epsilon.events.bus.EventBus;
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.bus.listeners.ConsumerListener;
 import com.github.epsilon.events.impl.PacketEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.events.impl.Render3DEvent;
-import com.github.epsilon.events.impl.TickEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
@@ -174,9 +174,7 @@ public class SafeAnchor extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
+    private void onTick(PlayerTickEvent event) {
         // Yield only before SafeAnchor starts. Once the cover/explode sequence is running,
         // keep ownership so a manual anchor blast cannot cancel the damage-block placement.
         if ((AnchorBlast.INSTANCE.isActive() || DoubleAnchor.INSTANCE.isActive()) && stage == Stage.None) {
@@ -337,7 +335,7 @@ public class SafeAnchor extends Module {
 
         int charges = mc.level.getBlockState(currentAnchorPos).getValue(RespawnAnchorBlock.CHARGE);
 
-        // Cover / Adaptive: too close and no place pos 鈫?quick charge + explode
+        // Cover / Adaptive: too close and no place pos �?quick charge + explode
         if (isTooCloseToAnchor()) {
             BlockPos placePos = findPlacePos();
             if (placePos == null) {
@@ -564,19 +562,6 @@ public class SafeAnchor extends Module {
         return !below.isAir() && !below.canBeReplaced() && mc.level.getBlockState(pos).canBeReplaced();
     }
 
-    /**
-     * Multi-algorithm safety check: calculates damage under multiple assumptions
-     * and takes the worst case to survive server-side variations.
-     * <p>
-     * Strategies:
-     * <ol>
-     *   <li><b>Actual</b> 鈥?reads real enchantments from player armor (vanilla).</li>
-     *   <li><b>PPPP</b> 鈥?assumes full Protection IV (common PvP setup).</li>
-     *   <li><b>No enchant</b> 鈥?armor only, no enchantment reduction (servers that nerf enchants).</li>
-     * </ol>
-     * Takes the maximum damage among all strategies + 12% safety margin
-     * to account for server-side rounding and custom explosion tweaks.
-     */
     private boolean isExplosionSafe() {
         if (currentAnchorPos == null) return false;
         Vec3 explosionCenter = currentAnchorPos.getCenter();
@@ -624,7 +609,7 @@ public class SafeAnchor extends Module {
                 addRenderBox(targetActionPos);
                 prepareExplode();
             } else {
-                // Cover placement failed 鈥?only explode if still safe without cover
+                // Cover placement failed �?only explode if still safe without cover
                 if (isExplosionSafe()) prepareExplode();
                 else resetState();
             }
@@ -710,12 +695,6 @@ public class SafeAnchor extends Module {
         return false;
     }
 
-    /**
-     * True iff the player's real crosshair hit is the locked {@link #currentAnchorPos}.
-     * Used by the Gaze Lock guard so we only charge an anchor the user is actively
-     * aiming at — brief glances or sweeping the view past an anchor never cause
-     * unintended auto-charging.
-     */
     private boolean isLookingAtCurrentAnchor() {
         if (currentAnchorPos == null) return false;
         HitResult hit = getCrosshairHit();
@@ -783,25 +762,15 @@ public class SafeAnchor extends Module {
         stageTicksElapsed = 0;
     }
 
-    /**
-     * True when this module is enabled AND mid-action (used by AimAssist to defer).
-     */
     public boolean isActive() {
         return isEnabled() && stage != Stage.None;
     }
 
-    /**
-     * Schedules a humanized delay before the next action, driven by the user's
-     * {@code Place CPS} setting. Base interval = 1000 / CPS ms, with ±25% Gaussian
-     * jitter and a hard floor of 50 ms so we never cross the 20-CPS physical ceiling.
-     * Clamped to [50, 250] ms to avoid runaway delays when a large negative jitter
-     * sample collides with a small CPS setting.
-     */
     private void scheduleDelay() {
         int cps = Math.max(1, placeCps.getValue());
         double baseMs = 1000.0 / cps;
         double jitter = baseMs * 0.25 * ThreadLocalRandom.current().nextGaussian();
-        long delayMs = (long) Math.max(50.0, Math.min(250.0, baseMs + jitter));
+        long delayMs = (long) Mth.clamp(baseMs + jitter, 50.0, 250.0);
         nextActionTimeMs = System.currentTimeMillis() + delayMs;
     }
 

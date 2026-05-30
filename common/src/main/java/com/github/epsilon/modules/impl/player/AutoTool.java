@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -36,8 +36,7 @@ public class AutoTool extends Module {
     private final List<Integer> lastItem = new ArrayList<>();
 
     @EventHandler
-    public void onClientTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
+    public void onClientTick(PlayerTickEvent event) {
         if (!(mc.hitResult instanceof BlockHitResult result)) return;
 
         BlockPos pos = result.getBlockPos();

@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -140,8 +140,7 @@ public class Stealer extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
+    private void onTick(PlayerTickEvent event) {
         Screen currentScreen = mc.screen;
         if (currentScreen instanceof AbstractContainerScreen<?> container && container.getMenu() instanceof ChestMenu menu) {
             if (currentScreen != this.lastTickScreen) {

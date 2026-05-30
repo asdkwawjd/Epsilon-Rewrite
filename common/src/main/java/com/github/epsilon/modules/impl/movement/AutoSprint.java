@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.movement;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -26,8 +26,8 @@ public class AutoSprint extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (!nullCheck()) mc.options.keySprint.setDown(true);
+    private void onTick(PlayerTickEvent event) {
+        mc.options.keySprint.setDown(true);
     }
 
 }

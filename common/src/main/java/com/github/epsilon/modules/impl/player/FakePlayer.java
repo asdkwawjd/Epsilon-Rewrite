@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -74,9 +74,7 @@ public class FakePlayer extends Module {
     }
 
     @EventHandler
-    private void onClientTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
+    private void onPlayerTick(PlayerTickEvent event) {
         if (record.getValue()) {
             positions.add(new PlayerState(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.getYRot(), mc.player.getXRot()));
             return;

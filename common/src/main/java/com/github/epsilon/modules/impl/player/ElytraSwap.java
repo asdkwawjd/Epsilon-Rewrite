@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.player;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -48,9 +48,7 @@ public class ElytraSwap extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
+    private void onTick(PlayerTickEvent event) {
         if (mc.screen != null) return;
 
         boolean pressed = KeybindUtils.isPressed(activateKey.getValue());

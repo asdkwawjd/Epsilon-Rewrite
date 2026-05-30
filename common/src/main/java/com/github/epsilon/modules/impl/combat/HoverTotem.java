@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.BoolSetting;
@@ -52,9 +52,7 @@ public class HoverTotem extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck()) return;
-
+    private void onTick(PlayerTickEvent event) {
         if (mc.screen instanceof InventoryScreen inv) {
             Slot hoveredSlot = inv.hoveredSlot;
 

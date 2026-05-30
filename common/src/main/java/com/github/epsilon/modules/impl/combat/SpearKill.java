@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.managers.target.TargetManager;
 import com.github.epsilon.managers.target.TargetRequest;
 import com.github.epsilon.modules.Category;
@@ -68,9 +68,7 @@ public class SpearKill extends Module {
     }
 
     @EventHandler
-    public void onTick(TickEvent.Pre e) {
-        if (nullCheck()) return;
-
+    public void onTick(PlayerTickEvent e) {
         updateTarget();
 
         currentlyCharging = isUsingSpear();

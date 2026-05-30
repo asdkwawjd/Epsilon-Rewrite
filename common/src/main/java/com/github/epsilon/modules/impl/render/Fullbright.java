@@ -1,7 +1,7 @@
 package com.github.epsilon.modules.impl.render;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.EnumSetting;
@@ -38,9 +38,8 @@ public class Fullbright extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (nullCheck() || mode.is(Mode.Gamma)) return;
-        mc.player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, -1, 0));
+    private void onPlayerTick(PlayerTickEvent event) {
+        if (mode.is(Mode.Potion)) mc.player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, -1, 0));
     }
 
 }

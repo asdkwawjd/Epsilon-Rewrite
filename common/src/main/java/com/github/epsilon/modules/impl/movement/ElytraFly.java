@@ -2,7 +2,7 @@ package com.github.epsilon.modules.impl.movement;
 
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.KeyboardInputEvent;
-import com.github.epsilon.events.impl.TickEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.events.impl.TravelEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
@@ -61,7 +61,7 @@ public class ElytraFly extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onTick(PlayerTickEvent event) {
         if (nullCheck()) {
             toggle();
             return;

@@ -1,8 +1,8 @@
 package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
+import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.events.impl.SwingHandEvent;
-import com.github.epsilon.events.impl.TickEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.managers.target.TargetManager;
 import com.github.epsilon.managers.target.TargetRequest;
@@ -42,7 +42,7 @@ public class SilentAim extends Module {
     private LivingEntity target;
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onTick(PlayerTickEvent event) {
         if (nullCheck() || !redirecting) return;
 
         if (

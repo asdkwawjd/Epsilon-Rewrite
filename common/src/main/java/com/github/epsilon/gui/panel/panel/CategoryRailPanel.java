@@ -2,8 +2,8 @@ package com.github.epsilon.gui.panel.panel;
 
 import com.github.epsilon.Constants;
 import com.github.epsilon.assets.i18n.EpsilonTranslateComponent;
-import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.assets.i18n.TranslateComponent;
+import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.RoundRectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
@@ -23,8 +23,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 
 import java.awt.*;
-
-import static com.github.epsilon.Constants.mc;
 
 public class CategoryRailPanel {
 

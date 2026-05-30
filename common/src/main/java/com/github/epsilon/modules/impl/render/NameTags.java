@@ -1,9 +1,9 @@
 package com.github.epsilon.modules.impl.render;
 
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.events.impl.Render2DEvent;
 import com.github.epsilon.events.impl.Render3DEvent;
+import com.github.epsilon.graphics.LuminRenderSystem;
 import com.github.epsilon.graphics.renderers.RectRenderer;
 import com.github.epsilon.graphics.renderers.TextRenderer;
 import com.github.epsilon.managers.FriendManager;

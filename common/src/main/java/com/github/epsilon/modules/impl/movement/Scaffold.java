@@ -1,11 +1,12 @@
 package com.github.epsilon.modules.impl.movement;
 
-import com.github.epsilon.Constants;
 import com.github.epsilon.events.bus.EventBus;
 import com.github.epsilon.events.bus.EventHandler;
-import com.github.epsilon.events.bus.EventPriority;
 import com.github.epsilon.events.bus.listeners.ConsumerListener;
-import com.github.epsilon.events.impl.*;
+import com.github.epsilon.events.impl.KeyboardInputEvent;
+import com.github.epsilon.events.impl.PlayerTickEvent;
+import com.github.epsilon.events.impl.Render3DEvent;
+import com.github.epsilon.events.impl.SendPositionEvent;
 import com.github.epsilon.managers.RotationManager;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;

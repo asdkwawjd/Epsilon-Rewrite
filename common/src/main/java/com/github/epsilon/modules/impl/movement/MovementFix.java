@@ -11,7 +11,7 @@ public class MovementFix extends Module {
 
     private MovementFix() {
         super("Movement Fix", Category.MOVEMENT);
-        setEnabled(true); // Toggle on client initial
+        setDefaultEnabled(true);
     }
 
     private float getDirection(float forward, float strafe) {

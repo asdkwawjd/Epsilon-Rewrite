@@ -34,6 +34,10 @@ public class Module {
 
     private boolean enabled;
 
+    private boolean defaultHidden = false;
+
+    private boolean defaultEnabled = false;
+
     public final List<Setting<?>> settings = new ArrayList<>();
     public final List<SettingGroup> settingGroups = new ArrayList<>();
 
@@ -98,13 +102,26 @@ public class Module {
         }
     }
 
+    protected void setDefaultEnabled(boolean defaultEnabled) {
+        this.defaultEnabled = defaultEnabled;
+        setEnabled(defaultEnabled);
+    }
+
+    protected void setDefaultHidden(boolean defaultHidden) {
+        this.defaultHidden = defaultHidden;
+        this.hidden = defaultHidden;
+    }
+
     public void reset() {
         setEnabled(false);
         keyBind = -1;
         bindMode = BindMode.Toggle;
-        hidden = true;
+        hidden = defaultHidden;
         for (Setting<?> setting : settings) {
             setting.reset();
+        }
+        if (defaultEnabled) {
+            setEnabled(true);
         }
     }
 

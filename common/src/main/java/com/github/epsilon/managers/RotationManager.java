@@ -4,12 +4,14 @@ import com.github.epsilon.events.bus.EventBus;
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.bus.EventPriority;
 import com.github.epsilon.events.impl.*;
+import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.modules.impl.movement.MovementFix;
 import com.github.epsilon.utils.rotation.Priority;
 import com.github.epsilon.utils.rotation.Rot2f;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.util.Mth;
 
 import java.util.function.Function;
@@ -36,7 +38,6 @@ public class RotationManager {
 
     private int priority;
     private Runnable callback;
-    private boolean rotationRequested;
 
     private RotationManager() {
         EventBus.INSTANCE.subscribe(this);
@@ -78,7 +79,6 @@ public class RotationManager {
         this.priority = priority.priority;
         this.callback = callback;
         this.active = true;
-        this.rotationRequested = true;
 
         smooth();
     }
@@ -174,6 +174,13 @@ public class RotationManager {
     }
 
     @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        if (active && event.getPacket() instanceof ServerboundUseItemPacket packet) {
+            event.setPacket(new ServerboundUseItemPacket(packet.getHand(), packet.getSequence(), rotations.getYaw(), rotations.getPitch()));
+        }
+    }
+
+    @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.getPacket() instanceof ClientboundPlayerPositionPacket || event.getPacket() instanceof ClientboundPlayerRotationPacket) {
             s08 = true;
@@ -194,20 +201,9 @@ public class RotationManager {
 
             if (callback != null) {
                 callback.run();
+                callback = null;
             }
         }
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    private void onTickRotateBack(TickEvent.Pre event) {
-        if (mc.player == null || mc.level == null) return;
-        if (active && !rotationRequested && callback == null) {
-            targetRotations = new Rot2f(mc.player.getYRot(), mc.player.getXRot());
-            rotationSpeed = 10 * 18;
-            raytrace = null;
-            smoothed = false;
-        }
-        rotationRequested = false;
     }
 
     @EventHandler
@@ -244,10 +240,8 @@ public class RotationManager {
 
         lastAnimationRotation = animationRotation;
         animationRotation = new Rot2f(event.getYaw(), event.getPitch());
-        if (!active) {
-            targetRotations = new Rot2f(mc.player.getYRot(), mc.player.getXRot());
-            raytrace = null;
-        }
+        targetRotations = new Rot2f(mc.player.getYRot(), mc.player.getXRot());
+        raytrace = null;
         smoothed = false;
     }
 
@@ -261,7 +255,7 @@ public class RotationManager {
 
     @EventHandler
     private void onRaytrace(RaytraceEvent event) {
-        if (rotations != null && event.getEntity() == mc.player && active) {
+        if (rotations != null && event.getEntity() == mc.player && active && ClientSetting.INSTANCE.modifyCrosshair.getValue()) {
             event.setYaw(rotations.getYaw());
             event.setPitch(rotations.getPitch());
         }

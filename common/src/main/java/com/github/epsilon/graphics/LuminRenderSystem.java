@@ -5,8 +5,11 @@ import com.github.epsilon.assets.holders.RendererHolder;
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
 import com.github.epsilon.modules.impl.ClientSetting;
 import com.mojang.blaze3d.ProjectionType;
+import com.github.epsilon.graphics.buffer.LuminRingBuffer;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.*;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -17,9 +20,14 @@ import net.minecraft.client.renderer.rendertype.TextureTransform;
 import net.minecraft.client.renderer.state.WindowRenderState;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
+import org.joml.Matrix4fc;
+import org.lwjgl.system.MemoryUtil;
 
 import javax.annotation.Nullable;
+import java.nio.ByteBuffer;
 import java.util.OptionalDouble;
 
 import static com.github.epsilon.Constants.mc;
@@ -151,19 +159,34 @@ public class LuminRenderSystem {
         if (colorView == null) return null;
 
         final var indexCount = vertexCount / 4 * 6;
+        GpuBuffer ibo = getQuadIndexBuffer(indexCount);
 
-        RenderSystem.AutoStorageIndexBuffer autoIndices =
-                RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
-        GpuBuffer ibo = autoIndices.getBuffer(indexCount);
-
-        GpuBufferSlice dynamicUniforms = RenderSystem.getDynamicUniforms().writeTransform(
+        GpuBufferSlice dynamicUniforms = writeTransform(
                 RenderSystem.getModelViewMatrix(),
                 new Vector4f(1, 1, 1, 1),
                 new Vector3f(0, 0, 0),
                 TextureTransform.DEFAULT_TEXTURING.getMatrix()
         );
 
-        return new QuadRenderingInfo(colorView, depthView, autoIndices, ibo, indexCount, dynamicUniforms);
+        return new QuadRenderingInfo(colorView, depthView, getQuadIndexType(), ibo, indexCount, dynamicUniforms);
+    }
+
+    public static GpuBuffer getQuadIndexBuffer(int indexCount) {
+        RenderSystem.AutoStorageIndexBuffer autoIndices =
+                RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+        return autoIndices.getBuffer(indexCount);
+    }
+
+    public static VertexFormat.IndexType getQuadIndexType() {
+        RenderSystem.AutoStorageIndexBuffer autoIndices =
+                RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS);
+        return autoIndices.type();
+    }
+
+    public static GpuBufferSlice writeTransform(Matrix4fc modelView, Vector4fc colorModulator, Vector3fc modelOffset, Matrix4fc textureMatrix) {
+        return RenderSystem.getDynamicUniforms().writeTransform(
+                modelView, colorModulator, modelOffset, textureMatrix
+        );
     }
 
     public record ScissorRect(int x, int y, int width, int height) {
@@ -172,7 +195,7 @@ public class LuminRenderSystem {
     public record QuadRenderingInfo(
             GpuTextureView colorView,
             @Nullable GpuTextureView depthView,
-            RenderSystem.AutoStorageIndexBuffer autoIndices,
+            VertexFormat.IndexType indexType,
             GpuBuffer ibo,
             int indexCount,
             GpuBufferSlice dynamicUniforms

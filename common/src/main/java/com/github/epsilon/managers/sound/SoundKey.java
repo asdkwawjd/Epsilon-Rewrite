@@ -9,7 +9,13 @@ public enum SoundKey {
     DISABLE("disable"),
     SETTINGS_OPEN("settings_open"),
     SETTINGS_CLOSE("settings_close"),
-    SHUTDOWN("shutdown");
+    SHUTDOWN("shutdown"),
+    UWU("uwu"),
+    NYA("nya"),
+    MOAN1("moan1"),
+    MOAN2("moan2"),
+    MOAN3("moan3"),
+    MOAN4("moan4");
 
     private final String path;
 

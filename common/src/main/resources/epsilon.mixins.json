@@ -9,6 +9,7 @@
     "MixinChatComponent",
     "MixinClientPacketListener",
     "MixinConnection",
+    "MixinDataComponentInitializerEntry",
     "MixinEntity",
     "MixinEntityRenderer",
     "MixinEquipmentLayerRenderer",

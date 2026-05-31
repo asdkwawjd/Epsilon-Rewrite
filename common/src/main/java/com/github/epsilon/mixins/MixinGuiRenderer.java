@@ -48,8 +48,8 @@ public class MixinGuiRenderer {
     @Unique
     private EpsilonGuiRenderer epsilon$guiRenderer;
 
-    @Inject(method = "draw", at = @At("HEAD"))
-    private void onDrawHead(GpuBufferSlice fogBuffer, CallbackInfo ci) {
+    @Inject(method = "render", at = @At("HEAD"))
+    private void onRenderHead(GpuBufferSlice fogBuffer, CallbackInfo ci) {
         if (epsilon$levelRenderState == null || epsilon$levelGuiRenderer == null) {
             this.epsilon$levelRenderState = new GuiRenderState();
             this.epsilon$levelGuiRenderer = new EpsilonGuiRenderer(

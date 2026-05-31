@@ -67,7 +67,7 @@ public class Scaffold extends Module {
 
                         double scale = 1.0;
                         if (box.shrink()) {
-                            scale = 1.0 - Easing.EASE_OUT_QUAD.getFunction().apply(progress);
+                            scale = 1.0 - Easing.EASE_IN_OUT_EXPO.getFunction().apply(progress);
                             if (scale < 0) scale = 0;
                         }
 

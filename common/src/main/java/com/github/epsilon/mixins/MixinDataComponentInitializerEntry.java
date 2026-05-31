@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinDataComponentInitializerEntry<T> {
 
     @WrapOperation(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/component/DataComponentInitializers$Initializer;run(Lnet/minecraft/core/component/DataComponentMap$Builder;Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/resources/ResourceKey;)V"))
-    private void skipMissingInstrument(DataComponentInitializers.Initializer instance, DataComponentMap.Builder builder, HolderLookup.Provider provider, ResourceKey<T> tResourceKey, Operation<Void> original) {
+    private void skipMissingInstrument(DataComponentInitializers.Initializer<T> initializer, DataComponentMap.Builder components, HolderLookup.Provider context, ResourceKey<T> key, Operation<Void> original) {
         try {
             original.call(initializer, components, context, key);
         } catch (IllegalStateException exception) {

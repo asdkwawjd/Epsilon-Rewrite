@@ -9,6 +9,7 @@ import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.IntSetting;
 import com.github.epsilon.utils.math.MathUtils;
+import com.github.epsilon.utils.timer.TimerUtils;
 
 public class SoundFX extends Module {
 
@@ -26,11 +27,17 @@ public class SoundFX extends Module {
     }
 
     private final IntSetting volume = intSetting("Volume", 100, 1, 100, 5);
+    private final IntSetting delay = intSetting("Delay", 0, 0, 20, 1);
     private final EnumSetting<HitSound> hitSound = enumSetting("Hit Sound", HitSound.OFF);
+
+    private final TimerUtils timer = new TimerUtils();
 
     @EventHandler
     private void onAttackEntity(AttackEntityEvent event) {
-        playHitSound(hitSound.getValue());
+        if (timer.hasDelayed(delay.getValue())) {
+            playHitSound(hitSound.getValue());
+            timer.reset();
+        }
     }
 
     private void playHitSound(HitSound value) {

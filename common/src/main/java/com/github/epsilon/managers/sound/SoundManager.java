@@ -19,7 +19,11 @@ public class SoundManager {
     }
 
     public void playInUi(SoundKey key) {
-        playSound(key, 0.75f, 1.2f);
+        playSound(key, 1.2f);
+    }
+
+    public void playSound(SoundKey key, float volume) {
+        playSound(key, 1.0f, volume);
     }
 
     public void playSound(SoundKey key, float pitch, float volume) {

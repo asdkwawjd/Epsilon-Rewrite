@@ -57,7 +57,7 @@ public class SoundFX extends Module {
     }
 
     private void playSound(SoundKey key) {
-        SoundManager.INSTANCE.playSound(key, 1.0f, volume.getValue().floatValue() / 100.0f);
+        SoundManager.INSTANCE.playSound(key, volume.getValue().floatValue() / 100.0f);
     }
 
 }

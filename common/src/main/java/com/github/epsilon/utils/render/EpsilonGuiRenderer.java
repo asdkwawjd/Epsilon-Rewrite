@@ -30,6 +30,7 @@ import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
+import net.minecraft.client.renderer.state.WindowRenderState;
 import net.minecraft.client.renderer.state.gui.*;
 import net.minecraft.client.renderer.state.gui.pip.OversizedItemRenderState;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -484,7 +485,9 @@ public class EpsilonGuiRenderer implements AutoCloseable {
         renderPass.setVertexBuffer(0, draw.vertexBuffer);
         ScreenRectangle scissorArea = draw.scissorArea();
         if (scissorArea != null) {
-            this.enableScissor(scissorArea, renderPass);
+            if (!this.enableScissor(scissorArea, renderPass)) {
+                return;
+            }
         } else {
             renderPass.disableScissor();
         }
@@ -517,9 +520,17 @@ public class EpsilonGuiRenderer implements AutoCloseable {
         }
     }
 
-    private void enableScissor(ScreenRectangle rectangle, RenderPass renderPass) {
-        LuminRenderSystem.ScissorRect scissor = LuminRenderSystem.toFramebufferScissor(rectangle.left(), rectangle.top(), rectangle.width(), rectangle.height());
-        renderPass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height());
+    private boolean enableScissor(ScreenRectangle rectangle, RenderPass renderPass) {
+        WindowRenderState window = mc.gameRenderer.getGameRenderState().windowRenderState;
+        LuminRenderSystem.ScissorRect scissor = ScissorUtils.toFramebufferScissor(
+                rectangle.left(),
+                rectangle.top(),
+                rectangle.width(),
+                rectangle.height(),
+                window.guiScale,
+                window.height
+        );
+        return ScissorUtils.enableScissor(renderPass, scissor);
     }
 
     public void registerPanoramaTextures(TextureManager textureManager) {

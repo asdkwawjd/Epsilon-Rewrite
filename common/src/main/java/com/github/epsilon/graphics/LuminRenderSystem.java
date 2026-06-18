@@ -4,6 +4,7 @@ import com.github.epsilon.assets.holders.RenderTargetHolder;
 import com.github.epsilon.assets.holders.RendererHolder;
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
 import com.github.epsilon.modules.impl.ClientSetting;
+import com.github.epsilon.utils.render.ScissorUtils;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
@@ -109,22 +110,11 @@ public class LuminRenderSystem {
     }
 
     public static ScissorRect toFramebufferScissor(float x, float y, float width, float height) {
-        double scale = getGuiScale();
-        WindowRenderState windowState = mc.gameRenderer.getGameRenderState().windowRenderState;
-        int sx = (int) Math.round(x * scale);
-        int sy = (int) Math.round(windowState.height - (y + height) * scale);
-        int sw = Math.max(0, (int) Math.round(width * scale));
-        int sh = Math.max(0, (int) Math.round(height * scale));
-        return clampFramebufferScissor(sx, sy, sw, sh);
+        return ScissorUtils.toFramebufferScissor(x, y, width, height);
     }
 
     public static ScissorRect toFramebufferScissor(float x, float y, float width, float height, float guiHeight) {
-        double scale = getGuiScale();
-        int sx = (int) Math.round(x * scale);
-        int sy = (int) Math.round((guiHeight - y - height) * scale);
-        int sw = Math.max(0, (int) Math.round(width * scale));
-        int sh = Math.max(0, (int) Math.round(height * scale));
-        return clampFramebufferScissor(sx, sy, sw, sh);
+        return ScissorUtils.toFramebufferScissor(x, y, width, height, guiHeight);
     }
 
     public static ScissorRect toFramebufferScissor(float x, float y, float width, float height, int guiHeight) {
@@ -197,25 +187,6 @@ public class LuminRenderSystem {
         return RenderSystem.getDynamicUniforms().writeTransform(
                 modelView, colorModulator, modelOffset, textureMatrix
         );
-    }
-
-    private static ScissorRect clampFramebufferScissor(int x, int y, int width, int height) {
-        int areaWidth;
-        int areaHeight;
-        if (activeTarget != null) {
-            areaWidth = activeTarget.width();
-            areaHeight = activeTarget.height();
-        } else {
-            WindowRenderState windowState = mc.gameRenderer.getGameRenderState().windowRenderState;
-            areaWidth = windowState.width;
-            areaHeight = windowState.height;
-        }
-
-        int left = Math.clamp(x, 0, areaWidth);
-        int top = Math.clamp(y, 0, areaHeight);
-        int right = Math.clamp(x + width, 0, areaWidth);
-        int bottom = Math.clamp(y + height, 0, areaHeight);
-        return new ScissorRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
     }
 
     public record ScissorRect(int x, int y, int width, int height) {

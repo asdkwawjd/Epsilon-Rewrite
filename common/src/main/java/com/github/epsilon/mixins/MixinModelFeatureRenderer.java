@@ -1,6 +1,6 @@
 package com.github.epsilon.mixins;
 
-import com.github.epsilon.managers.ShaderManager;
+import com.github.epsilon.holders.ShaderHolder;
 import com.github.epsilon.modules.impl.render.Shaders;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -24,9 +24,9 @@ public class MixinModelFeatureRenderer {
 
     @WrapOperation(method = "renderModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;setColor(I)V"))
     private void redirectChestOutlineColor(OutlineBufferSource outlineBufferSource, int color, Operation<Void> original) {
-        epsilon$renderingChestOutline = color == ShaderManager.EPSILON_CHEST_OUTLINE_MARKER;
+        epsilon$renderingChestOutline = color == ShaderHolder.EPSILON_CHEST_OUTLINE_MARKER;
         if (epsilon$renderingChestOutline) {
-            ShaderManager.INSTANCE.getChestOutlineBufferSource().setColor(Shaders.INSTANCE.outlineColor.getValue().getRGB());
+            ShaderHolder.INSTANCE.getChestOutlineBufferSource().setColor(Shaders.INSTANCE.outlineColor.getValue().getRGB());
             return;
         }
 
@@ -36,7 +36,7 @@ public class MixinModelFeatureRenderer {
     @WrapOperation(method = "renderModel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OutlineBufferSource;getBuffer(Lnet/minecraft/client/renderer/rendertype/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"))
     private VertexConsumer redirectChestOutlineBuffer(OutlineBufferSource outlineBufferSource, RenderType renderType, Operation<VertexConsumer> original) {
         if (epsilon$renderingChestOutline) {
-            return ShaderManager.INSTANCE.getChestOutlineBufferSource().getBuffer(renderType);
+            return ShaderHolder.INSTANCE.getChestOutlineBufferSource().getBuffer(renderType);
         }
 
         return original.call(outlineBufferSource, renderType);
@@ -45,7 +45,7 @@ public class MixinModelFeatureRenderer {
     @Inject(method = "renderModel", at = @At("RETURN"))
     private <S> void clearChestOutlineState(SubmitNodeStorage.ModelSubmit<S> submit, RenderType renderType, VertexConsumer buffer, OutlineBufferSource outlineBufferSource, MultiBufferSource.BufferSource crumblingBufferSource, CallbackInfo ci) {
         if (epsilon$renderingChestOutline) {
-            ShaderManager.INSTANCE.endChestOutlineBatch();
+            ShaderHolder.INSTANCE.endChestOutlineBatch();
         }
         epsilon$renderingChestOutline = false;
     }

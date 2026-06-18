@@ -1,8 +1,8 @@
 package com.github.epsilon.graphics;
 
-import com.github.epsilon.assets.holders.RenderTargetHolder;
-import com.github.epsilon.assets.holders.RendererHolder;
 import com.github.epsilon.assets.resources.ResourceLocationUtils;
+import com.github.epsilon.holders.RenderTargetHolder;
+import com.github.epsilon.holders.RendererHolder;
 import com.github.epsilon.modules.impl.ClientSetting;
 import com.github.epsilon.utils.render.ScissorUtils;
 import com.mojang.blaze3d.ProjectionType;

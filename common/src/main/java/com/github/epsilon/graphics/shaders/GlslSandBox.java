@@ -18,7 +18,6 @@ import net.minecraft.util.Util;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
@@ -32,8 +31,6 @@ public class GlslSandBox implements AutoCloseable {
     public static final Identifier MINECRAFT = ResourceLocationUtils.getIdentifier("menu/minecraft");
     public static final Identifier PLANET = ResourceLocationUtils.getIdentifier("menu/planet");
 
-    private static final Identifier FULLSCREEN_VERTEX = Identifier.withDefaultNamespace("core/screenquad");
-
     private static final int SANDBOX_INFO_SIZE = new Std140SizeCalculator()
             .putVec4()
             .putVec4()
@@ -46,7 +43,7 @@ public class GlslSandBox implements AutoCloseable {
     private RenderPipeline getOrCreatePipeline(Identifier fragmentShader) {
         return pipelines.computeIfAbsent(fragmentShader, shader -> RenderPipeline.builder(RenderPipelines.POST_PROCESSING_SNIPPET)
                 .withLocation(Identifier.fromNamespaceAndPath(shader.getNamespace(), "pipelines/glsl_sandbox/" + shader.getPath().replace('/', '_')))
-                .withVertexShader(FULLSCREEN_VERTEX)
+                .withVertexShader(Identifier.withDefaultNamespace("core/screenquad"))
                 .withFragmentShader(shader)
                 .withUniform("GlslSandboxInfo", UniformType.UNIFORM_BUFFER)
                 .withCull(false)

@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.OptionalInt;
 
 /**
- * @author ilove0329P
+ * @author 06789
  * Thanks to furry client.
  */
 public class ShaderHolder {

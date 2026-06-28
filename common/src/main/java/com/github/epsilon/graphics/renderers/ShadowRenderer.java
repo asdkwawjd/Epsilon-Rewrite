@@ -17,13 +17,16 @@ import java.util.OptionalInt;
 
 public class ShadowRenderer implements IRenderer {
 
-    private static final long BUFFER_SIZE = 256 * 1024;
+    private static final long BUFFER_SIZE = 64 * 1024;
+    private static final int STRIDE = 48;
+    private static final long SHADOW_BYTES = STRIDE * 4L;
     private final LuminRingBuffer buffer = new LuminRingBuffer(BUFFER_SIZE, GpuBuffer.USAGE_VERTEX);
 
     private boolean scissorEnabled = false;
     private int scissorX, scissorY, scissorW, scissorH;
     private long currentOffset = 0;
     private int vertexCount = 0;
+    private LuminRenderSystem.QuadRenderingInfo sharedInfo;
 
     private ShadowRenderer() {
     }
@@ -37,6 +40,7 @@ public class ShadowRenderer implements IRenderer {
     }
 
     public void addShadow(float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, float blurRadius, Color color) {
+        buffer.ensureCapacity(currentOffset + SHADOW_BYTES);
         buffer.tryMap();
 
         float vx = x - blurRadius;
@@ -74,7 +78,7 @@ public class ShadowRenderer implements IRenderer {
         MemoryUtil.memPutFloat(p + 40, r3);
         MemoryUtil.memPutFloat(p + 44, r4);
 
-        currentOffset += 48;
+        currentOffset += STRIDE;
         vertexCount++;
     }
 
@@ -108,10 +112,40 @@ public class ShadowRenderer implements IRenderer {
             if (scissorEnabled) ScissorUtils.enableScissor(pass, scissorX, scissorY, scissorW, scissorH);
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("DynamicTransforms", info.dynamicUniforms());
-            pass.setVertexBuffer(0, buffer.getGpuBuffer());
-            pass.setIndexBuffer(info.ibo(), info.indexType());
-            pass.drawIndexed(0, 0, info.indexCount(), 1);
+            drawPrepared(pass, info);
         }
+    }
+
+    @Override
+    public boolean prepareSharedDraw() {
+        sharedInfo = null;
+        if (vertexCount == 0) return false;
+        if (buffer.isMapped()) buffer.unmap();
+        if (scissorEnabled && !ScissorUtils.isVisible(scissorW, scissorH)) return false;
+
+        sharedInfo = LuminRenderSystem.prepareQuadRendering(vertexCount, false);
+        return sharedInfo != null && sharedInfo.colorView() != null;
+    }
+
+    @Override
+    public void draw(RenderPass pass) {
+        if (sharedInfo == null) return;
+        pass.setUniform("DynamicTransforms", sharedInfo.dynamicUniforms());
+        drawPrepared(pass, sharedInfo);
+    }
+
+    private void drawPrepared(RenderPass pass, LuminRenderSystem.QuadRenderingInfo info) {
+        if (scissorEnabled) {
+            if (!ScissorUtils.enableScissor(pass, scissorX, scissorY, scissorW, scissorH)) {
+                return;
+            }
+        } else {
+            pass.disableScissor();
+        }
+
+        pass.setVertexBuffer(0, buffer.getGpuBuffer());
+        pass.setIndexBuffer(LuminRenderSystem.getQuadIndexBuffer(info.indexCount()), LuminRenderSystem.getQuadIndexType());
+        pass.drawIndexed(0, 0, info.indexCount(), 1);
     }
 
     @Override
@@ -122,6 +156,7 @@ public class ShadowRenderer implements IRenderer {
         }
         vertexCount = 0;
         currentOffset = 0;
+        sharedInfo = null;
     }
 
     @Override

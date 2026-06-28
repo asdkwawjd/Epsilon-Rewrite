@@ -23,14 +23,14 @@ public class CrystalChams extends Module {
     private final ColorSetting sideColor = colorSetting("Side Color", new Color(160, 120, 255, 70), true);
     private final ColorSetting lineColor = colorSetting("Line Color", new Color(230, 220, 255, 220), true);
     private final DoubleSetting scale = doubleSetting("Scale", 1.0, 0.1, 3.0, 0.05);
-    private final DoubleSetting lineWidth = doubleSetting("Line Width", 1.5, 0.5, 5.0, 0.5);
+    private final DoubleSetting lineWidth = doubleSetting("Line Width", 2.0, 0.5, 5.0, 0.5);
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         for (Entity entity : mc.level.entitiesForRendering()) {
-            if (entity instanceof EndCrystal endCrystal && endCrystal.isAlive()) {
-                WireframeEntityRenderer.render(event.getPoseStack(), endCrystal, scale.getValue(), sideColor.getValue(), lineColor.getValue(), lineWidth.getValue().floatValue());
-            }
+            if (!(entity instanceof EndCrystal endCrystal)) continue;
+            WireframeEntityRenderer.render(event.getPoseStack(), endCrystal, scale.getValue(), sideColor.getValue(), lineColor.getValue(), lineWidth.getValue().floatValue());
+
         }
     }
 

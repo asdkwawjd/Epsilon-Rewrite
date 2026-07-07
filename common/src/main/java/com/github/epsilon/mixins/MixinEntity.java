@@ -1,6 +1,7 @@
 package com.github.epsilon.mixins;
 
 import com.github.epsilon.events.bus.EventBus;
+import com.github.epsilon.events.impl.EntityMoveEvent;
 import com.github.epsilon.events.impl.RaytraceEvent;
 import com.github.epsilon.events.impl.StrafeEvent;
 import com.github.epsilon.modules.impl.movement.Velocity;
@@ -11,6 +12,7 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import static com.github.epsilon.Constants.mc;
@@ -45,6 +47,16 @@ public class MixinEntity {
                 args.set(2, 0.0);
             }
         }
+    }
+
+    @ModifyVariable(method = "move", at = @At("HEAD"), argsOnly = true)
+    private Vec3 onMoveModifyVariable(Vec3 delta) {
+        Entity self = (Entity) (Object) this;
+        if (net.minecraft.client.Minecraft.getInstance().player == null) return delta;
+        if (self == net.minecraft.client.Minecraft.getInstance().player) return delta;
+        EntityMoveEvent event = new EntityMoveEvent(self, delta);
+        EventBus.INSTANCE.post(event);
+        return event.movement;
     }
 
 }

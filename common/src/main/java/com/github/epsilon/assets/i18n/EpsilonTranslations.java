@@ -104,10 +104,7 @@ public final class EpsilonTranslations {
             PlayerAlarms.GAMEMODE_CREATIVE,
             PlayerAlarms.GAMEMODE_ADVENTURE,
             PlayerAlarms.GAMEMODE_SPECTATOR,
-            PlayerAlarms.UNKNOWN_GAMEMODE,
-            EntityControl.ACTIVATED,
-            EntityControl.DEACTIVATED,
-            EntityControl.DEACTIVATED_DISMOUNT
+            PlayerAlarms.UNKNOWN_GAMEMODE
     );
 
     private EpsilonTranslations() {
@@ -252,15 +249,6 @@ public final class EpsilonTranslations {
         public static final TranslateComponent UNKNOWN_GAMEMODE = create("modules.player alarms", "unknown_gamemode");
 
         private PlayerAlarms() {
-        }
-    }
-
-    public static final class EntityControl {
-        public static final TranslateComponent ACTIVATED = create("modules.entity control", "activated");
-        public static final TranslateComponent DEACTIVATED = create("modules.entity control", "deactivated");
-        public static final TranslateComponent DEACTIVATED_DISMOUNT = create("modules.entity control", "deactivated_dismount");
-
-        private EntityControl() {
         }
     }
 

@@ -57,10 +57,7 @@
     "MixinTitleScreen",
     "MixinWalkAnimationState",
     "MixinWebBlock",
-    "MixinWindow",
-    "MixinMob",
-    "MixinPig",
-    "MixinStrider"
+    "MixinWindow"
   ],
   "injectors": {
     "defaultRequire": 1

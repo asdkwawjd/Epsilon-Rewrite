@@ -1,11 +1,14 @@
 package com.github.epsilon.mixins;
 
 import com.github.epsilon.holders.ShaderHolder;
+import com.github.epsilon.modules.impl.render.FreeCamera;
 import com.github.epsilon.modules.impl.render.Shaders;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import org.joml.Matrix4fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +31,13 @@ public class MixinGameRenderer {
             ShaderHolder.INSTANCE.processEntityOutlineTarget(target, shaders.mode.getValue());
             ShaderHolder.INSTANCE.processChestOutlineTarget(minecraft.getMainRenderTarget());
             ShaderHolder.INSTANCE.processHandOutlineTarget(minecraft.getMainRenderTarget());
+        }
+    }
+
+    @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
+    private void renderItemInHand(CameraRenderState cameraState, float deltaPartialTick, Matrix4fc modelViewMatrix, CallbackInfo ci) {
+        if (!FreeCamera.INSTANCE.renderHands()) {
+            ci.cancel();
         }
     }
 

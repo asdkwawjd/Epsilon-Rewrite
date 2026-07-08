@@ -30,7 +30,6 @@ public class Disabler extends Module {
 
     @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
-        if (nullCheck()) return;
         Packet<?> packet = event.getPacket();
 
         if (badPacketsA.getValue()) {

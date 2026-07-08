@@ -37,7 +37,6 @@ public class AutoTool extends Module {
 
     @EventHandler
     public void onClientTick(PlayerTickEvent.Pre event) {
-        if (nullCheck()) return;
         if (!(mc.hitResult instanceof BlockHitResult result)) return;
 
         BlockPos pos = result.getBlockPos();

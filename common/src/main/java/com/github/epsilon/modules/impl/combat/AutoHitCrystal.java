@@ -97,7 +97,7 @@ public class AutoHitCrystal extends Module {
 
     @EventHandler
     private void onTick(PlayerTickEvent.Pre event) {
-        if (nullCheck() || mc.screen != null) {
+        if (mc.screen != null) {
             return;
         }
 

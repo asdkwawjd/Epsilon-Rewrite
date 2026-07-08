@@ -49,7 +49,7 @@ public class ElytraSwap extends Module {
 
     @EventHandler
     private void onTick(PlayerTickEvent.Pre event) {
-        if (nullCheck() || mc.screen != null) return;
+        if (mc.screen != null) return;
 
         boolean pressed = KeybindUtils.isPressed(activateKey.getValue());
         if (!pressed) {

@@ -46,7 +46,6 @@ public class Stuck extends Module {
 
     @EventHandler
     private void onPacket(PacketEvent.Send event) {
-        if (nullCheck()) return;
         if (mode.is(Mode.NoPacket)) {
             if (event.getPacket() instanceof ServerboundMovePlayerPacket || (event.getPacket() instanceof ClientboundSetEntityMotionPacket setEntityMotionPacket && setEntityMotionPacket.id() == mc.player.getId())) {
                 event.setCancelled(true);
@@ -59,7 +58,6 @@ public class Stuck extends Module {
 
     @EventHandler
     private void onTravel(TravelEvent event) {
-        if (nullCheck()) return;
         if (mode.is(Mode.CancelMove) && mc.player.positionReminder < 19) {
             event.setCancelled(true);
         }
@@ -67,7 +65,6 @@ public class Stuck extends Module {
 
     @EventHandler
     private void onInteract(ClickEvent event) {
-        if (nullCheck()) return;
         if (mode.is(Mode.NoPacket)) {
             if (mc.player.getYRot() != lastYaw || mc.player.getXRot() != lastPitch) {
                 PacketUtils.sendSilently(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), mc.player.getXRot(), mc.player.onGround(), mc.player.horizontalCollision));

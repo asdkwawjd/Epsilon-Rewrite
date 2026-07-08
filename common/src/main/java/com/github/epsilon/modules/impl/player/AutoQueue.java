@@ -50,7 +50,6 @@ public class AutoQueue extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (nullCheck()) return;
         if (mode.getValue() != Mode.XIN_2B2T) return;
         if (!(event.getPacket() instanceof ClientboundSystemChatPacket packet)) return;
 

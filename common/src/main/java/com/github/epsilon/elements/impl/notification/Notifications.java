@@ -13,8 +13,8 @@ import net.minecraft.client.DeltaTracker;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class Notifications extends HudModule {
 

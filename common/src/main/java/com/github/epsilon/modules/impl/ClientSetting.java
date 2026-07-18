@@ -84,6 +84,7 @@ public class ClientSetting extends Module {
     private final SettingGroup sgGeneral = settingGroup("General");
     private final SettingGroup sgAntiCheat = settingGroup("Anti Cheat");
     private final SettingGroup sgAppearance = settingGroup("Appearance");
+    private final SettingGroup sgReisa = settingGroup("Uzawa Reisa");
     private final SettingGroup sgNotification = settingGroup("Notification");
 
     @SuppressWarnings("unused")
@@ -162,6 +163,15 @@ public class ClientSetting extends Module {
 
     public final BoolSetting showWelcomeScreen = boolSetting("Show Welcome Screen", true).rootSetting().group(sgAppearance);
 
+    // 宇泽玲纱
+    public final BoolSetting showReisaInDropdown = boolSetting("Show Reisa In Dropdown", true).group(sgReisa);
+
+    public final BoolSetting showReisaOnStartup = boolSetting("Show Reisa On Startup", true).group(sgReisa);
+
+    public final BoolSetting showReisaOnShutdown = boolSetting("Show Reisa On Shutdown", true).group(sgReisa);
+
+    public final DoubleSetting reisaVolume = doubleSetting("Reisa Volume", 1.0, 0.0, 1.0, 0.05).group(sgReisa);
+
     // Notification
     public final BoolSetting soundNotify = boolSetting("Sound Notify", true).group(sgNotification);
 
@@ -190,14 +200,6 @@ public class ClientSetting extends Module {
     private void applyFontGlyphUploadBudget(int maxGlyphsPerFrame) {
         int budget = Math.max(1, maxGlyphsPerFrame);
         TtfFontLoader.setMaxGlyphUploadsPerFrame(budget);
-    }
-
-    public boolean snapRotation() {
-        return rotationMode.is(RotationManager.RotationMode.SNAP);
-    }
-
-    public boolean silentRotation() {
-        return rotationMode.is(RotationManager.RotationMode.SILENT);
     }
 
 }

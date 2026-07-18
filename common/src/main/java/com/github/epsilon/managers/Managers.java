@@ -1,7 +1,6 @@
 package com.github.epsilon.managers;
 
 import com.github.epsilon.events.bus.EventBus;
-import com.github.epsilon.graphics.schedulers.render3d.Render3DScheduler;
 import com.github.epsilon.managers.impl.FriendManager;
 import com.github.epsilon.managers.impl.HealthManager;
 import com.github.epsilon.managers.impl.NotificationManager;
@@ -37,7 +36,6 @@ public class Managers {
         SOUND = new SoundManager();
         NOTIFICATION = new NotificationManager();
         TIMER = new TimerManager();
-        Render3DScheduler.init();
     }
 
     public static void switchRotationManager(RotationManager.RotationMode mode) {

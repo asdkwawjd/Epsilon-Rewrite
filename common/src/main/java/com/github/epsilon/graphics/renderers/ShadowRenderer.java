@@ -6,6 +6,7 @@ import com.github.epsilon.graphics.buffer.LuminRingBuffer;
 import com.github.epsilon.holders.RendererHolder;
 import com.github.epsilon.utils.render.ScissorUtils;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.ARGB;
@@ -20,6 +21,7 @@ public class ShadowRenderer implements IRenderer {
     private static final long BUFFER_SIZE = 16 * 1024;
     private static final int STRIDE = 48;
     private static final long SHADOW_BYTES = STRIDE * 4L;
+
     private final LuminRingBuffer buffer = new LuminRingBuffer(BUFFER_SIZE, GpuBuffer.USAGE_VERTEX);
 
     private boolean scissorEnabled = false;
@@ -40,43 +42,42 @@ public class ShadowRenderer implements IRenderer {
     }
 
     public void addShadow(float x, float y, float width, float height, float rTL, float rTR, float rBR, float rBL, float blurRadius, Color color) {
+        float x2 = x + width;
+        float y2 = y + height;
+        float left = x - blurRadius;
+        float top = y - blurRadius;
+        float right = x2 + blurRadius;
+        float bottom = y2 + blurRadius;
+
         buffer.ensureCapacity(currentOffset + SHADOW_BYTES);
         buffer.tryMap();
 
-        float vx = x - blurRadius;
-        float vy = y - blurRadius;
-        float vx2 = x + width + blurRadius;
-        float vy2 = y + height + blurRadius;
+        int abgr = ARGB.toABGR(color.getRGB());
 
-        float bx2 = x + width;
-        float by2 = y + height;
-
-        int argb = ARGB.toABGR(color.getRGB());
-
-        addVertex(vx, vy, x, y, bx2, by2, rTL, rTR, rBR, rBL, blurRadius, argb);
-        addVertex(vx, vy2, x, y, bx2, by2, rTL, rTR, rBR, rBL, blurRadius, argb);
-        addVertex(vx2, vy2, x, y, bx2, by2, rTL, rTR, rBR, rBL, blurRadius, argb);
-        addVertex(vx2, vy, x, y, bx2, by2, rTL, rTR, rBR, rBL, blurRadius, argb);
+        addVertex(left, top, x, y, x2, y2, rTL, rTR, rBR, rBL, blurRadius, abgr);
+        addVertex(left, bottom, x, y, x2, y2, rTL, rTR, rBR, rBL, blurRadius, abgr);
+        addVertex(right, bottom, x, y, x2, y2, rTL, rTR, rBR, rBL, blurRadius, abgr);
+        addVertex(right, top, x, y, x2, y2, rTL, rTR, rBR, rBL, blurRadius, abgr);
     }
 
-    private void addVertex(float vx, float vy, float rx1, float ry1, float rx2, float ry2, float r1, float r2, float r3, float r4, float blurRadius, int color) {
-        long baseAddr = MemoryUtil.memAddress(buffer.getMappedBuffer());
-        long p = baseAddr + currentOffset;
+    private void addVertex(float x, float y, float innerX1, float innerY1, float innerX2, float innerY2,
+                           float rTL, float rTR, float rBR, float rBL, float blurRadius, int color) {
+        long address = MemoryUtil.memAddress(buffer.getMappedBuffer()) + currentOffset;
 
-        MemoryUtil.memPutFloat(p, vx);
-        MemoryUtil.memPutFloat(p + 4, vy);
-        MemoryUtil.memPutFloat(p + 8, blurRadius);
-        MemoryUtil.memPutInt(p + 12, color);
+        MemoryUtil.memPutFloat(address, x);
+        MemoryUtil.memPutFloat(address + 4, y);
+        MemoryUtil.memPutFloat(address + 8, blurRadius);
+        MemoryUtil.memPutInt(address + 12, color);
 
-        MemoryUtil.memPutFloat(p + 16, rx1);
-        MemoryUtil.memPutFloat(p + 20, ry1);
-        MemoryUtil.memPutFloat(p + 24, rx2);
-        MemoryUtil.memPutFloat(p + 28, ry2);
+        MemoryUtil.memPutFloat(address + 16, innerX1);
+        MemoryUtil.memPutFloat(address + 20, innerY1);
+        MemoryUtil.memPutFloat(address + 24, innerX2);
+        MemoryUtil.memPutFloat(address + 28, innerY2);
 
-        MemoryUtil.memPutFloat(p + 32, r1);
-        MemoryUtil.memPutFloat(p + 36, r2);
-        MemoryUtil.memPutFloat(p + 40, r3);
-        MemoryUtil.memPutFloat(p + 44, r4);
+        MemoryUtil.memPutFloat(address + 32, rTL);
+        MemoryUtil.memPutFloat(address + 36, rTR);
+        MemoryUtil.memPutFloat(address + 40, rBR);
+        MemoryUtil.memPutFloat(address + 44, rBL);
 
         currentOffset += STRIDE;
         vertexCount++;
@@ -104,15 +105,18 @@ public class ShadowRenderer implements IRenderer {
         if (info == null || info.colorView() == null) return;
         if (scissorEnabled && !ScissorUtils.isVisible(scissorW, scissorH)) return;
 
-        try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-                () -> "Lumin Shadow Draw", info.colorView(), OptionalInt.empty(),
-                info.depthView(), OptionalDouble.empty())
-        ) {
-            pass.setPipeline(LuminRenderPipelines.SHADOW);
-            if (scissorEnabled) ScissorUtils.enableScissor(pass, scissorX, scissorY, scissorW, scissorH);
-            RenderSystem.bindDefaultUniforms(pass);
-            pass.setUniform("DynamicTransforms", info.dynamicUniforms());
-            drawPrepared(pass, info);
+        try {
+            try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
+                    () -> "Lumin Shadow Draw", info.colorView(), OptionalInt.empty(),
+                    info.depthView(), OptionalDouble.empty())
+            ) {
+                pass.setPipeline(LuminRenderPipelines.SHADOW);
+                RenderSystem.bindDefaultUniforms(pass);
+                pass.setUniform("DynamicTransforms", info.dynamicUniforms());
+                drawPrepared(pass, info);
+            }
+        } finally {
+            GlStateManager._disableScissorTest();
         }
     }
 
@@ -130,8 +134,12 @@ public class ShadowRenderer implements IRenderer {
     @Override
     public void draw(RenderPass pass) {
         if (sharedInfo == null) return;
-        pass.setUniform("DynamicTransforms", sharedInfo.dynamicUniforms());
-        drawPrepared(pass, sharedInfo);
+        try {
+            pass.setUniform("DynamicTransforms", sharedInfo.dynamicUniforms());
+            drawPrepared(pass, sharedInfo);
+        } finally {
+            GlStateManager._disableScissorTest();
+        }
     }
 
     private void drawPrepared(RenderPass pass, LuminRenderSystem.QuadRenderingInfo info) {
@@ -154,13 +162,15 @@ public class ShadowRenderer implements IRenderer {
             if (buffer.isMapped()) buffer.unmap();
             buffer.rotate();
         }
-        vertexCount = 0;
+
         currentOffset = 0;
+        vertexCount = 0;
         sharedInfo = null;
     }
 
     @Override
     public void close() {
+        clear();
         buffer.close();
         RendererHolder.INSTANCE.unregister(this);
     }

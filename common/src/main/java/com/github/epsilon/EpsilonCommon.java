@@ -2,6 +2,7 @@ package com.github.epsilon;
 
 import com.github.epsilon.assets.i18n.EpsilonLanguageManager;
 import com.github.epsilon.assets.i18n.I18NFileGenerator;
+import com.github.epsilon.commands.CommandManager;
 import com.github.epsilon.events.bus.EventBus;
 import com.github.epsilon.graphics.schedulers.render3d.Render3DScheduler;
 import com.github.epsilon.holders.AddonHolder;
@@ -9,6 +10,7 @@ import com.github.epsilon.holders.ConfigHolder;
 import com.github.epsilon.holders.HudElementHolder;
 import com.github.epsilon.holders.ModuleHolder;
 import com.github.epsilon.managers.Managers;
+import com.github.epsilon.managers.impl.network.via.ViaVersionManager;
 import com.github.epsilon.modules.impl.ClientSetting;
 
 import java.lang.invoke.MethodHandles;
@@ -25,10 +27,14 @@ public class EpsilonCommon {
         HudElementHolder.INSTANCE.initElements();
         AddonHolder.INSTANCE.setupAddons();
         ConfigHolder.INSTANCE.initConfig();
+        CommandManager.INSTANCE.initCommands();
         EpsilonLanguageManager.INSTANCE.selectLanguage(ClientSetting.INSTANCE.language.getValue());
 
         // 初始化 Managers
         Managers.initManagers();
+
+        // 初始化 ViaVersion
+        ViaVersionManager.INSTANCE.init(Constants.mc.gameDirectory.toPath());
 
         // 初始化 Render3DScheduler 里的 RenderPipeline
         Render3DScheduler.init();

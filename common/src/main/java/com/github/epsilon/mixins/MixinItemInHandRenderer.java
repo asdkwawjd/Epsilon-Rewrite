@@ -72,6 +72,24 @@ public abstract class MixinItemInHandRenderer {
         epsilon$blocked = HandsView.INSTANCE.shouldApplyBlockingAnimation(hand, itemStack);
     }
 
+    @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V", ordinal = 0, shift = At.Shift.BEFORE))
+    private void applyHandSizeScale_ordinal0(AbstractClientPlayer player, float frameInterp, float xRot, InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, CallbackInfo ci) {
+        HandsView handsView = HandsView.INSTANCE;
+        if (handsView.isEnabled() && handsView.modifyHandSize.getValue()) {
+            float scale = handsView.handSize.getValue().floatValue();
+            poseStack.scale(scale, scale, scale);
+        }
+    }
+
+    @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;I)V", ordinal = 1, shift = At.Shift.BEFORE))
+    private void applyHandSizeScale_ordinal1(AbstractClientPlayer player, float frameInterp, float xRot, InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, CallbackInfo ci) {
+        HandsView handsView = HandsView.INSTANCE;
+        if (handsView.isEnabled() && handsView.modifyHandSize.getValue()) {
+            float scale = handsView.handSize.getValue().floatValue();
+            poseStack.scale(scale, scale, scale);
+        }
+    }
+
     @Inject(method = "renderArmWithItem", at = @At("RETURN"))
     private void clearBlockingState(AbstractClientPlayer player, float frameInterp, float xRot, InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, CallbackInfo ci) {
         epsilon$blocked = false;

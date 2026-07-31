@@ -16,6 +16,7 @@ import com.github.epsilon.gui.theme.MD3Theme;
 import com.github.epsilon.managers.Managers;
 import com.github.epsilon.managers.impl.sound.SoundKey;
 import com.github.epsilon.modules.impl.ClientSetting;
+import com.github.epsilon.utils.render.VideoBackground;
 import com.github.epsilon.utils.render.animation.Easing;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -72,6 +73,8 @@ public class MainMenuScreen extends Screen {
 
     private LuminRenderSystem.LuminRenderTarget backgroundRenderTarget;
     private LuminRenderSystem.LuminRenderTarget uiRenderTarget;
+
+    private VideoBackground videoBackground;
 
     private long introStartMs;
     private boolean initialized;
@@ -221,9 +224,17 @@ public class MainMenuScreen extends Screen {
             case PLANET -> GlslSandBox.PLANET;
             case BLACK_HOLE -> GlslSandBox.BLACK_HOLE;
             case MINECRAFT -> GlslSandBox.MINECRAFT;
+            case VIDEO -> null;
         };
 
-        GlslSandBox.INSTANCE.render(background, LuminRenderSystem.toEpsilonMouseX(mouseX), LuminRenderSystem.toEpsilonMouseY(mouseY));
+        if (background != null) {
+            GlslSandBox.INSTANCE.render(background, LuminRenderSystem.toEpsilonMouseX(mouseX), LuminRenderSystem.toEpsilonMouseY(mouseY));
+        } else {
+            if (videoBackground == null) {
+                videoBackground = new VideoBackground();
+            }
+            videoBackground.render();
+        }
 
         LuminRenderSystem.setActiveTarget(null);
         graphics.blit(backgroundRenderTarget.getIdentifier(), 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), 0, 1, 1, 0);
@@ -773,6 +784,10 @@ public class MainMenuScreen extends Screen {
             uiRenderTarget.close();
             uiRenderTarget = null;
         }
+        if (videoBackground != null) {
+            videoBackground.close();
+            videoBackground = null;
+        }
         scene.close();
     }
 
@@ -834,7 +849,8 @@ public class MainMenuScreen extends Screen {
         INFERNO,
         PLANET,
         BLACK_HOLE,
-        MINECRAFT
+        MINECRAFT,
+        VIDEO
     }
 
 }

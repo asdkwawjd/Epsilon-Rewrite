@@ -51,3 +51,8 @@ accessible method net/minecraft/world/entity/player/Player canPlayerFitWithinBlo
 accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
 
 accessible method net/minecraft/client/player/LocalPlayer isMoving ()Z
+
+accessible field net/minecraft/client/gui/screens/ChatScreen input Lnet/minecraft/client/gui/components/EditBox;
+
+accessible field net/minecraft/client/gui/components/ChatComponent trimmedMessages Ljava/util/List;
+accessible field net/minecraft/client/gui/components/ChatComponent allMessages Ljava/util/List;

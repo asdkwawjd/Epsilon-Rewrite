@@ -9,6 +9,11 @@ dependencies {
     minecraft(libs.minecraft)
     implementation(libs.fabric.loader)
     implementation(libs.fabric.api)
+    implementation(libs.jcodec)
+    implementation(libs.viaversion.common)
+    implementation(libs.viabackwards.common)
+    include(libs.viaversion.common)
+    include(libs.viabackwards.common)
     compileOnly(libs.sodium.fabric)
     compileOnly(libs.jsr305)
 }

@@ -76,6 +76,15 @@ repositories {
         }
         filter { includeGroup("net.caffeinemc") }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "ViaVersion"
+                url = uri("https://repo.viaversion.com")
+            }
+        }
+        filter { includeGroup("com.viaversion") }
+    }
 }
 
 val licenseFileName = "LICENSE_${modName}"

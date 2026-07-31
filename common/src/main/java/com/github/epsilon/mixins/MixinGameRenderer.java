@@ -41,4 +41,11 @@ public class MixinGameRenderer {
         }
     }
 
+    @Inject(method = "processBlurEffect", at = @At("HEAD"), cancellable = true)
+    private void epsilon$disableScreenBlur(CallbackInfo ci) {
+        if (minecraft.screen != null) {
+            ci.cancel();
+        }
+    }
+
 }

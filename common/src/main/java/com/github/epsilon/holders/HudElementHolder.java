@@ -34,6 +34,7 @@ public class HudElementHolder {
         addElement(BPS.INSTANCE);
         addElement(MTF.INSTANCE);
         addElement(Inventory.INSTANCE);
+        addElement(Island.INSTANCE);
         addElement(ModuleList.INSTANCE);
         addElement(Potions.INSTANCE);
         addElement(ScaffoldBlock.INSTANCE);

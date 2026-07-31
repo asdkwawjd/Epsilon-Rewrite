@@ -4,6 +4,7 @@ import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.modules.impl.combat.KillAura;
 import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.settings.impl.IntSetting;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -50,6 +51,9 @@ public class HandsView extends Module {
 
     public final BoolSetting modifySwingDuration = boolSetting("Modify Swing Duration", false);
     public final IntSetting swingDuration = intSetting("Swing Duration", 6, 0, 20, 1, modifySwingDuration::getValue);
+
+    public final BoolSetting modifyHandSize = boolSetting("Modify Hand Size", false);
+    public final DoubleSetting handSize = doubleSetting("Hand Size", 1.0, 0.1, 3.0, 0.05, modifyHandSize::getValue);
 
     public final BoolSetting swingWhileUsing = boolSetting("Visual Swing On Use", true);
     public final BoolSetting onlyOnBlock = boolSetting("Only On Block", true, swingWhileUsing::getValue);

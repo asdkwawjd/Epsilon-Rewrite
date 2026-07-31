@@ -2,7 +2,11 @@ package com.github.epsilon.mixins;
 
 import com.github.epsilon.events.bus.EventBus;
 import com.github.epsilon.events.impl.Render2DEvent;
+import com.github.epsilon.graphics.renderers.RoundRectRenderer;
+import com.github.epsilon.graphics.shaders.BlurShader;
 import com.github.epsilon.utils.render.EpsilonGuiRenderer;
+import com.github.epsilon.utils.render.ScoreboardPositionCalculator;
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.GuiRenderer;
@@ -17,6 +21,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.awt.*;
+import java.util.function.Supplier;
 
 import static com.github.epsilon.Constants.mc;
 
@@ -46,6 +53,9 @@ public class MixinGuiRenderer {
 
     @Unique
     private EpsilonGuiRenderer epsilon$guiRenderer;
+
+    @Unique
+    private final Supplier<RoundRectRenderer> epsilon$roundRectRenderer = Suppliers.memoize(RoundRectRenderer::create);
 
     @Inject(method = "draw", at = @At("HEAD"))
     private void onDrawHead(GpuBufferSlice fogBuffer, CallbackInfo ci) {
@@ -78,6 +88,9 @@ public class MixinGuiRenderer {
 
         GuiGraphicsExtractor levelGuiGraphics = new GuiGraphicsExtractor(mc, epsilon$levelRenderState, mouseX, mouseY);
         EventBus.INSTANCE.post(new Render2DEvent.Level(levelGuiGraphics));
+
+        epsilon$renderScoreboardBackground(levelGuiGraphics);
+
         epsilon$levelGuiRenderer.render(fogBuffer);
         epsilon$levelGuiRenderer.endFrame();
 
@@ -87,6 +100,25 @@ public class MixinGuiRenderer {
         epsilon$guiRenderer.render(fogBuffer);
 
         epsilon$guiRenderer.endFrame();
+    }
+
+    @Unique
+    private void epsilon$renderScoreboardBackground(GuiGraphicsExtractor graphics) {
+        if (!ScoreboardPositionCalculator.shouldRender()) return;
+        float[] bounds = ScoreboardPositionCalculator.calculateBounds();
+        if (bounds == null) return;
+        float x = bounds[0], y = bounds[1], w = bounds[2], h = bounds[3];
+        float radius = 4.0f;
+        float blurStrength = 8.0f;
+
+        BlurShader.INSTANCE.render(x, y, w, h, radius, blurStrength);
+
+        RoundRectRenderer rr = epsilon$roundRectRenderer.get();
+        int glowPad = 2;
+        rr.addRoundRect(x - glowPad, y - glowPad, w + glowPad * 2, h + glowPad * 2,
+                radius + glowPad, new Color(0, 0, 0, 0x20));
+        rr.addRoundRect(x, y, w, h, radius, new Color(0, 0, 0, 0x90));
+        rr.drawAndClear();
     }
 
 }

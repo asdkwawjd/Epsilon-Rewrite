@@ -2,17 +2,13 @@ package com.github.epsilon.modules.impl.combat;
 
 import com.github.epsilon.events.bus.EventHandler;
 import com.github.epsilon.events.impl.AttackEntityEvent;
-import com.github.epsilon.events.impl.KeyboardInputEvent;
+import com.github.epsilon.events.impl.JumpEvent;
 import com.github.epsilon.events.impl.PlayerTickEvent;
 import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
-import com.github.epsilon.settings.impl.BoolSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import com.github.epsilon.utils.network.PacketUtils;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 
 public class Criticals extends Module {
 
@@ -22,99 +18,117 @@ public class Criticals extends Module {
         super("Criticals", Category.COMBAT);
     }
 
-    private enum PacketMode {
-        Pure,
-        Legit
+    private enum Mode {
+        PURE,
+        LEGIT,
+        VULCAN_297
     }
 
-    private final EnumSetting<PacketMode> packetMode = enumSetting("Packet Mode", PacketMode.Pure);
-    private final BoolSetting groundOnly = boolSetting("GroundO nly", false, () -> packetMode.is(PacketMode.Pure));
-    private final BoolSetting alwaysShowCritParticles = boolSetting("Show Crit Particles", true, () -> packetMode.is(PacketMode.Legit));
+    private final EnumSetting<Mode> mode = enumSetting("Mode", Mode.PURE);
 
-    private boolean shouldShowCritParticles = false;
-    private Entity lastAttackedEntity = null;
-
-    @Override
-    public String getInfo() {
-        return packetMode.getTranslatedValue();
-    }
+    // VULCAN_297 状态
+    private static final int JUMP_RECOVERY_TICKS = 8;
+    private static final int LANDING_RECOVERY_TICKS = 2;
+    private int jumpRecoveryTicks;
+    private int landingRecoveryTicks;
+    private boolean wasAirborne;
 
     @Override
     protected void onEnable() {
-        shouldShowCritParticles = false;
-        lastAttackedEntity = null;
+        resetVulcan297State();
+    }
+
+    @Override
+    protected void onDisable() {
+        resetVulcan297State();
+    }
+
+    @EventHandler
+    private void onTick(PlayerTickEvent.Post event) {
+        if (!mode.is(Mode.VULCAN_297)) return;
+        updateVulcan297State();
+    }
+
+    @EventHandler
+    private void onJump(JumpEvent event) {
+        if (!mode.is(Mode.VULCAN_297)) return;
+        jumpRecoveryTicks = JUMP_RECOVERY_TICKS;
+        landingRecoveryTicks = LANDING_RECOVERY_TICKS;
+        wasAirborne = true;
     }
 
     @EventHandler
     private void onAttackEntity(AttackEntityEvent event) {
-        if (!(event.getEntity() instanceof LivingEntity)) return;
+        if (nullCheck()) return;
 
-        if (packetMode.is(PacketMode.Pure)) {
-            if (!isCriticalHitAvailable() || (groundOnly.getValue() && !mc.player.onGround())) {
-                return;
-            }
-            AABB box = mc.player.getBoundingBox().move(0.0, 0.0625, 0.0);
-            if (!mc.level.getBlockCollisions(mc.player, box).iterator().hasNext()) {
-                doPacketCriticals();
-            }
-        } else if (packetMode.is("Legit")) {
-            if (alwaysShowCritParticles.getValue()) {
-                lastAttackedEntity = event.getEntity();
-                shouldShowCritParticles = true;
-            }
+        if (mode.is(Mode.VULCAN_297)) {
+            if (!canPerformVulcan297Critical()) return;
+            performVulcan297Critical();
+            return;
         }
+
+        if (mode.is(Mode.LEGIT)) return;
+
+        // Pure 模式：经典发包暴击
+        PacketUtils.sendSilently(new ServerboundMovePlayerPacket.Pos(
+                mc.player.getX(), mc.player.getY() + 0.0625, mc.player.getZ(), false, mc.player.horizontalCollision));
+        PacketUtils.sendSilently(new ServerboundMovePlayerPacket.Pos(
+                mc.player.getX(), mc.player.getY(), mc.player.getZ(), false, mc.player.horizontalCollision));
     }
 
-    @EventHandler
-    private void onTick(PlayerTickEvent.Pre event) {
-        if (packetMode.is(PacketMode.Legit)) {
-            if (shouldShowCritParticles && lastAttackedEntity != null) {
-                mc.player.crit(lastAttackedEntity);
-                shouldShowCritParticles = false;
-            }
+    // ==================== VULCAN_297 ====================
+
+    private void updateVulcan297State() {
+        if (nullCheck()) {
+            resetVulcan297State();
+            return;
         }
-    }
 
-    @EventHandler
-    private void onKeyboardInput(KeyboardInputEvent event) {
-        if (packetMode.is(PacketMode.Legit)) {
-            KillAura killAura = KillAura.INSTANCE;
-            if (killAura.isEnabled() && killAura.target != null) {
-                if (mc.player.fallDistance > 0) {
-                    double dist = mc.player.distanceTo(killAura.target);
-                    if (dist <= killAura.aimRange.getValue().doubleValue() + 0.3) {
-                        event.setSprint(false);
-                        mc.player.setSprinting(false);
-                        mc.options.keySprint.setDown(false);
-                    }
-                }
-            }
+        if (jumpRecoveryTicks > 0) {
+            jumpRecoveryTicks--;
         }
+
+        if (!mc.player.onGround()) {
+            wasAirborne = true;
+            landingRecoveryTicks = LANDING_RECOVERY_TICKS;
+            return;
+        }
+
+        if (wasAirborne && landingRecoveryTicks > 0) {
+            landingRecoveryTicks--;
+            return;
+        }
+
+        wasAirborne = false;
+        landingRecoveryTicks = 0;
     }
 
-    private void doPacketCriticals() {
-        Vec3 pos = mc.player.position();
-        boolean ground = mc.player.onGround();
-
-        mc.player.setPos(pos.add(0.0, 0.0625, 0.0));
-        mc.player.setOnGround(false);
-        mc.player.sendPosition();
-
-        mc.player.setPos(pos.add(0.0, 0.00125, 0.0));
-        mc.player.setOnGround(false);
-        mc.player.sendPosition();
-
-        mc.player.setPos(pos);
-        mc.player.setOnGround(ground);
+    private boolean canPerformVulcan297Critical() {
+        if (!mc.player.onGround()) return false;
+        if (jumpRecoveryTicks > 0) return false;
+        return landingRecoveryTicks <= 0;
     }
 
-    private boolean isCriticalHitAvailable() {
-        return mc.player.onGround() &&
-                !mc.player.isInWater() &&
-                !mc.player.isInLava() &&
-                !mc.player.onClimbable() &&
-                !mc.player.hasEffect(MobEffects.BLINDNESS) &&
-                !mc.player.isPassenger();
+    private void performVulcan297Critical() {
+        sendPositionPacket(0.021, false);
+        sendPositionPacket(0.011, false);
     }
 
+    private void sendPositionPacket(double yOffset, boolean onGround) {
+        PacketUtils.sendSilently(new ServerboundMovePlayerPacket.PosRot(
+                mc.player.getX(),
+                mc.player.getY() + yOffset,
+                mc.player.getZ(),
+                mc.player.getYRot(),
+                mc.player.getXRot(),
+                onGround,
+                mc.player.horizontalCollision
+        ));
+    }
+
+    private void resetVulcan297State() {
+        jumpRecoveryTicks = 0;
+        landingRecoveryTicks = 0;
+        wasAirborne = false;
+    }
 }

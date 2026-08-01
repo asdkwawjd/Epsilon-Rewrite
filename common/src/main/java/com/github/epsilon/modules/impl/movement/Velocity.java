@@ -7,6 +7,7 @@ import com.github.epsilon.modules.Category;
 import com.github.epsilon.modules.Module;
 import com.github.epsilon.settings.SettingGroup;
 import com.github.epsilon.settings.impl.BoolSetting;
+import com.github.epsilon.settings.impl.DoubleSetting;
 import com.github.epsilon.settings.impl.EnumSetting;
 import com.github.epsilon.utils.player.EnchantmentUtils;
 import com.github.epsilon.utils.player.PlayerUtils;
@@ -32,6 +33,7 @@ public class Velocity extends Module {
 
     private enum Mode {
         Cancel,
+        Custom,
         Legit,
     }
 
@@ -47,6 +49,9 @@ public class Velocity extends Module {
 
     private final BoolSetting excludeSpearLunge = boolSetting("Exclude Spear Lunge", false, () -> mode.is(Mode.Cancel)).group(sgExclusions);
     private final BoolSetting excludeWindCharge = boolSetting("Exclude Wind Charge", false, () -> mode.is(Mode.Cancel)).group(sgExclusions);
+
+    private final DoubleSetting horizontal = doubleSetting("Horizontal", 0.0, 0.0, 1.0, 0.01, () -> mode.is(Mode.Custom));
+    private final DoubleSetting vertical = doubleSetting("Vertical", 0.0, 0.0, 1.0, 0.01, () -> mode.is(Mode.Custom));
 
     private final TimerUtils windChargeTimer = new TimerUtils();
 
@@ -79,6 +84,17 @@ public class Velocity extends Module {
         if (nullCheck()) return;
 
         switch (mode.getValue()) {
+            case Custom -> {
+                if (event.getPacket() instanceof ClientboundSetEntityMotionPacket packet && packet.id() == mc.player.getId()) {
+                    Vec3 vel = packet.movement();
+                    Vec3 modified = new Vec3(
+                            vel.x * (1.0 - horizontal.getValue()),
+                            vel.y * (1.0 - vertical.getValue()),
+                            vel.z * (1.0 - horizontal.getValue())
+                    );
+                    event.setPacket(new ClientboundSetEntityMotionPacket(packet.id(), modified));
+                }
+            }
             case Cancel -> {
                 if (nullCheck()) return;
 

@@ -16,11 +16,14 @@ import com.github.epsilon.utils.render.esp.CircleESP;
 import com.github.epsilon.utils.render.esp.DeobfESP;
 import com.github.epsilon.utils.render.esp.FireflyESP;
 import com.github.epsilon.utils.rotation.Priority;
+import com.github.epsilon.utils.rotation.RaytraceUtils;
+import com.github.epsilon.utils.rotation.Rot2f;
 import com.github.epsilon.utils.rotation.RotationUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 import java.awt.*;
@@ -137,8 +140,10 @@ public class KillAura extends Module {
 
         if (mc.player.isUsingItem() || mc.player.isBlocking()) return;
 
+        double effectiveRange = Reach.getReach(null, aimRange.getValue());
+
         List<LivingEntity> targets = Managers.TARGET.acquireTargets(TargetRequest.of(
-                aimRange.getValue(),
+                effectiveRange,
                 fov.getValue().floatValue(),
                 player.getValue(),
                 mob.getValue(),
@@ -174,8 +179,18 @@ public class KillAura extends Module {
                     attacks -= 1.0;
                 }
             } else {
-                if (mc.player.getAttackStrengthScale(0.5f) >= 1.0f) {
-                    clickTargets(targets);
+                if (mc.player.getDeltaMovement().y > 0.0) return;
+
+                if (!isCooldownReady()) return;
+
+                Rot2f rot = Managers.ROTATION.getRotation();
+                double effectiveReach = Reach.getReach(target, aimRange.getValue());
+                HitResult hit = RaytraceUtils.raytrace(rot, effectiveReach);
+                if (hit instanceof EntityHitResult entityHit && entityHit.getEntity() == target) {
+                    doAttack(target);
+                    if (targetMode.is(TargetMode.Switch)) {
+                        switchIndex++;
+                    }
                 }
             }
         }
@@ -209,6 +224,10 @@ public class KillAura extends Module {
         } else {
             mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
         }
+    }
+
+    private boolean isCooldownReady() {
+        return mc.player.getAttackStrengthScale(0.0F) >= 1.0F;
     }
 
     @EventHandler
